@@ -17,6 +17,7 @@ import { default as GraphQLGlobalSchema } from './graphql/rootSchema';
 import { default as GraphQLUserResolver } from './graphql/user/resolver';
 import { mergeSchemas, mergeResolvers } from 'graphql-tools';
 import { authMiddleWare } from './middleware/authenticate';
+import { getError } from './utils/error/error-handler';
 
 const Server = express();
 
@@ -46,6 +47,10 @@ Server.use(
     }),
     rootValue: mergeResolvers([GraphQLUserResolver]),
     graphiql: true,
+    customFormatErrorFn(err: any) {
+      const error = getError(err.message || 'DEFAULT');
+      return { message: error.message, status: error.statusCode };
+    },
   })
 );
 Server.use('/file', FileRouter);
@@ -54,9 +59,9 @@ Server.get('/service-worker.js', (req, res) => {
 });
 
 Server.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  console.log(error);
-  const status = error.statusCode! || 500;
-  res.status(error.status).json(error.message);
+  const err = getError(error.message);
+  const data = error.data;
+  res.status(err.statusCode).json({ message: err.message, data: data });
 });
 
 mongoose

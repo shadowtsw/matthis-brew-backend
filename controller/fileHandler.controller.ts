@@ -6,11 +6,6 @@ import papaParse from 'papaparse';
 const mainDir = require.main!.path.toString();
 let pathDir = path.join(mainDir, 'files');
 
-let error = {
-  status: 500,
-  message: '',
-};
-
 export const upload: ExpressMiddleWare = async (req, res, next) => {
   console.log('upload arrives');
   let arrayToTransform: Array<any> = [];
@@ -23,9 +18,7 @@ export const upload: ExpressMiddleWare = async (req, res, next) => {
     })
       .pipe(papaParse.parse(papaParse.NODE_STREAM_INPUT, { header: true }))
       .on('error', (err) => {
-        error.status = 404;
-        error.message = err;
-        return next(error);
+        return res.status(500).send('Parsing file fails !');
       })
       .on('data', (row) => {
         arrayToTransform.push(row);

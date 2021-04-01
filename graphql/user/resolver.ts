@@ -8,16 +8,17 @@ import {
 } from '../../utils/jwt/jwt';
 
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
+import { errName } from '../../utils/error/error-handler';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
     try {
       if (!req.user) {
-        throw new Error('Not authenticated !');
+        throw new Error(errName.AUTH_FAILED);
       }
       const findUser = await User.findById(req.user._id).exec();
       if (!findUser) {
-        throw new Error('User not found in database');
+        throw new Error(errName.USER_NOT_FOUND);
       }
 
       return { ...findUser._doc, dateCreated: Number(findUser.dateCreated) };
@@ -27,7 +28,7 @@ const GraphQLResolver = {
   },
   createUser: async function ({ createUserInput }: any, req: any) {
     if (req.user) {
-      throw new Error('You are already logged in !');
+      throw new Error(errName.ALREADY_LOGGED_IN);
     }
     const {
       username,
@@ -39,10 +40,10 @@ const GraphQLResolver = {
     try {
       const findUser = await User.findOne({ username: username }).exec();
       if (findUser) {
-        throw new Error('User already exists !');
+        throw new Error(errName.USER_OR_EMAIL_EXISTS);
       }
       if (password !== confirmPassword) {
-        throw new Error('Passwort mismatched !');
+        throw new Error(errName.PASSWORD_MISMATCH);
       }
       const secretPassword = await hashedPassword(password);
       const newUser = new User({
@@ -64,25 +65,25 @@ const GraphQLResolver = {
     const { confirmPassword, ...dataWithoutConfirm } = updateUserInput;
 
     if (!req.user) {
-      throw new Error('Not authenticated !');
+      throw new Error(errName.AUTH_FAILED);
     }
 
     if (updateUserInput.password && !confirmPassword) {
-      throw new Error('Password confirmation is missing !');
+      throw new Error(errName.PASSWORD_MISMATCH);
     }
     if (
       updateUserInput.password &&
       confirmPassword &&
       updateUserInput.password !== confirmPassword
     ) {
-      throw new Error('Password mismatched !');
+      throw new Error(errName.PASSWORD_MISMATCH);
     }
 
     try {
       const findUser = await User.findById(req.user._id);
 
       if (!findUser) {
-        throw new Error('User not found in database !');
+        throw new Error(errName.USER_NOT_FOUND);
       }
 
       const { password, ...remainingProps } = dataWithoutConfirm;
@@ -103,16 +104,16 @@ const GraphQLResolver = {
   },
   login: async function ({ username, password }: any, req: any) {
     if (req.user) {
-      throw new Error('login: You are already logged in !');
+      throw new Error(errName.ALREADY_LOGGED_IN);
     }
     try {
       const user = await User.findOne({ username: username }).exec();
       if (!user) {
-        throw new Error('login: User not found !');
+        throw new Error(errName.USER_NOT_FOUND);
       }
       const comparePass = await comparePassword(password, user.meta.password);
       if (!comparePass) {
-        throw new Error('login: Wrong password !');
+        throw new Error(errName.PASSWORD_MISMATCH);
       }
       const authObject = {
         token: createToken({
@@ -140,10 +141,10 @@ const GraphQLResolver = {
         username: newAuthObject.username,
       }).exec();
       if (!user) {
-        throw new Error('refreshToken: User is not valid');
+        throw new Error(errName.TOKEN_EXPIRED);
       }
       if (user.meta.refreshToken !== refreshToken) {
-        throw new Error('refreshToken: refreshToken expired !');
+        throw new Error(errName.TOKEN_EXPIRED);
       }
       const newRefreshToken = createRefreshToken({
         username: user.username,
@@ -162,12 +163,12 @@ const GraphQLResolver = {
   },
   logout: async function ({}, req: any) {
     if (!req.user) {
-      throw new Error('logout: Nothing to log out !');
+      throw new Error(errName.LOGOUT_ERROR);
     }
     try {
       const user = await User.findById(req.user._id).exec();
       if (!user) {
-        throw new Error('logout: User not found in Database');
+        throw new Error(errName.USER_NOT_FOUND);
       }
       user.meta.refreshToken = '';
       await user.save();
