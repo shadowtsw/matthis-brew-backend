@@ -9,6 +9,7 @@ import {
 
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
 import { errName } from '../../utils/error/error-handler';
+import validator from 'validator';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
@@ -37,6 +38,13 @@ const GraphQLResolver = {
       confirmPassword,
     } = createUserInput;
 
+    if (!validator.isEmail(emailAddress)) {
+      throw new Error(errName.INVALID_EMAIL);
+    }
+    if (!validator.isLength(password, { min: 5 })) {
+      throw new Error(errName.INVALID_PASS);
+    }
+
     try {
       const findUser = await User.findOne({ username: username }).exec();
       if (findUser) {
@@ -48,7 +56,7 @@ const GraphQLResolver = {
       const secretPassword = await hashedPassword(password);
       const newUser = new User({
         username: username,
-        emailAddress: emailAddress,
+        emailAddress: emailAddress.toLowerCase(),
         dateCreated: new Date().getMilliseconds().toString(),
         meta: {
           password: secretPassword,
@@ -66,6 +74,19 @@ const GraphQLResolver = {
 
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
+    }
+
+    if (
+      updateUserInput.emailAddress &&
+      !validator.isEmail(updateUserInput.emailAddress)
+    ) {
+      throw new Error(errName.INVALID_EMAIL);
+    }
+    if (
+      updateUserInput.password &&
+      !validator.isLength(updateUserInput.password, { min: 5 })
+    ) {
+      throw new Error(errName.INVALID_PASS);
     }
 
     if (updateUserInput.password && !confirmPassword) {

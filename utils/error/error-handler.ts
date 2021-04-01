@@ -16,6 +16,8 @@ export const errName = {
   PASSWORD_MISMATCH: 'PASSWORD_MISMATCH',
   TOKEN_EXPIRED: 'TOKEN_EXPIRED',
   LOGOUT_ERROR: 'LOGOUT_ERROR',
+  INVALID_EMAIL: 'INVALID_EMAIL',
+  INVALID_PASS: 'INVALID_PASS',
 };
 
 const errorType: ErrorTypes = {
@@ -51,6 +53,14 @@ const errorType: ErrorTypes = {
     message:
       'Only Chuck Norries is able to logout without beeing logged in before',
     statusCode: 404,
+  },
+  INVALID_EMAIL: {
+    message: 'Invalid email, please enter valid email address',
+    statusCode: 500,
+  },
+  INVALID_PASS: {
+    message: 'Passwort is missing or must be at least 6 characters long',
+    statusCode: 500,
   },
 };
 
