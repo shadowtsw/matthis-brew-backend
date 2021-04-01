@@ -1,5 +1,8 @@
 import { buildSchema } from 'graphql';
 
+//meta entfernt
+//        meta: UserMeta
+
 const UserRelated: string = `
 
     type User {
@@ -7,7 +10,6 @@ const UserRelated: string = `
         username:String!
         emailAddress:String!
         dateCreated:Int
-        meta: UserMeta
         followers:[ID]
         following:[ID]
     }
