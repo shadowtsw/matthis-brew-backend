@@ -44,6 +44,7 @@ const GraphQLSchema = buildSchema(`
 
     type RootQuery {
         getUserDetails:User!
+        logout:String!
     }
     
     type RootMutation {

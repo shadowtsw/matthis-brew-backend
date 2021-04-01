@@ -1,4 +1,4 @@
-import bCrypt from 'bCrypt';
+import bCrypt from 'bcrypt';
 
 const salting = process.env.SALTING_ROUNDS || 10;
 const saltBefore = 'topsecret';
