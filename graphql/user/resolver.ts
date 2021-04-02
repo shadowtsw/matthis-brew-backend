@@ -122,7 +122,7 @@ const GraphQLResolver = {
           newProps.passwort = await hashedPassword(newProps.password);
         }
         let updatedProps = { ...oldDocProps, ...newProps };
-        User.updateOne({ _id: req.user._id }, updatedProps).exec();
+        await User.updateOne({ _id: req.user._id }, updatedProps).exec();
       }
 
       return await User.findById(req.user._id).exec();
