@@ -18,12 +18,21 @@ const GraphQLResolver = {
       if (!req.user) {
         throw new Error(errName.AUTH_FAILED);
       }
-      const findUser = await User.findById(req.user._id).exec();
+      const findUser = await User.findById(req.user._id).lean(true).exec();
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
       }
 
-      return { ...findUser._doc, dateCreated: Number(findUser.dateCreated) };
+      const { __v, ...relevantDoc } = findUser;
+
+      relevantDoc.createdAt = new Date(
+        Number(relevantDoc.createdAt)
+      ).toISOString();
+      relevantDoc.updatedAt = new Date(
+        Number(relevantDoc.updatedAt)
+      ).toISOString();
+
+      return relevantDoc;
     } catch (err) {
       throw err;
     }
@@ -47,13 +56,17 @@ const GraphQLResolver = {
     }
 
     try {
-      const findUser = await User.findOne({ username: username }).exec();
+      const findUser = await User.findOne({ username: username })
+        .lean(true)
+        .exec();
       if (findUser) {
         throw new Error(errName.USER_OR_EMAIL_EXISTS);
       }
       const findUserByEmail = await User.findOne({
         emailAddress: emailAddress,
-      }).exec();
+      })
+        .lean(true)
+        .exec();
 
       if (findUserByEmail) {
         throw new Error(errName.USER_OR_EMAIL_EXISTS);
@@ -66,7 +79,7 @@ const GraphQLResolver = {
       const newUser = new User({
         username: username,
         emailAddress: emailAddress.toLowerCase(),
-        dateCreated: new Date().getMilliseconds().toString(),
+        dateCreated: new Date().getTime().toString(),
         meta: {
           password: secretPassword,
         },
@@ -79,61 +92,46 @@ const GraphQLResolver = {
     }
   },
   updateUser: async function ({ updateUserInput }: any, req: any) {
-    const { confirmPassword, ...dataWithoutPassConfirm } = updateUserInput;
+    const { confirmPassword, password, emailAddress } = updateUserInput;
 
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
 
-    if (
-      updateUserInput.emailAddress &&
-      !validator.isEmail(updateUserInput.emailAddress)
-    ) {
+    if (emailAddress && !validator.isEmail(emailAddress)) {
       throw new Error(errName.INVALID_EMAIL);
     }
-    if (
-      updateUserInput.password &&
-      !validator.isLength(updateUserInput.password, { min: 5 })
-    ) {
+    if (password && !validator.isLength(password, { min: 5 })) {
       throw new Error(errName.INVALID_PASS);
     }
 
-    if (updateUserInput.password && !confirmPassword) {
+    if (password && !confirmPassword) {
       throw new Error(errName.PASSWORD_MISMATCH);
     }
-    if (
-      updateUserInput.password &&
-      confirmPassword &&
-      updateUserInput.password !== confirmPassword
-    ) {
+    if (password && confirmPassword && password !== confirmPassword) {
       throw new Error(errName.PASSWORD_MISMATCH);
     }
 
     try {
-      const findUser = await User.findById(req.user._id);
+      const findUser = await User.findById(req.user._id).exec();
 
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
       }
 
-      if (dataWithoutPassConfirm) {
-        console.log(dataWithoutPassConfirm);
-        const { password, ...newProps } = dataWithoutPassConfirm;
-        const {
-          _v,
-          _id,
-          createdAt,
-          updatedAt,
-          ...oldDocProps
-        } = findUser.toObject();
-        if (password) {
-          newProps.passwort = await hashedPassword(newProps.password);
+      if (emailAddress) {
+        const checkEmail = await User.findOne({ emailAddress: emailAddress })
+          .lean(true)
+          .exec();
+        if (checkEmail) {
+          throw new Error(errName.USER_OR_EMAIL_EXISTS);
         }
-        let updatedProps = { ...oldDocProps, ...newProps };
-        await User.updateOne({ _id: req.user._id }, updatedProps).exec();
+        findUser.emailAddress = emailAddress;
       }
-
-      return await User.findById(req.user._id).exec();
+      if (password) {
+        findUser.meta.password = await hashedPassword(password);
+      }
+      return await findUser.save();
     } catch (err) {
       throw err;
     }
@@ -175,7 +173,9 @@ const GraphQLResolver = {
       const newAuthObject = useRefreshToken(refreshToken);
       const user = await User.findOne({
         username: newAuthObject.username,
-      }).exec();
+      })
+        .lean(true)
+        .exec();
       if (!user) {
         throw new Error(errName.TOKEN_EXPIRED);
       }
@@ -187,8 +187,8 @@ const GraphQLResolver = {
         emailAddress: user.emailAddress,
         isAuth: true,
       });
-      user.meta.refreshToken = newRefreshToken;
-      await user.save();
+      req.user.meta.refreshToken = newRefreshToken;
+      await req.user.save();
       return {
         token: newAuthObject.token,
         refreshToken: newRefreshToken,
@@ -202,12 +202,12 @@ const GraphQLResolver = {
       throw new Error(errName.LOGOUT_ERROR);
     }
     try {
-      const user = await User.findById(req.user._id).exec();
+      const user = await User.findById(req.user._id).lean(true).exec();
       if (!user) {
         throw new Error(errName.USER_NOT_FOUND);
       }
-      user.meta.refreshToken = '';
-      await user.save();
+      req.user.meta.refreshToken = '';
+      await req.user.save();
       return 'Logout successful !';
     } catch (err) {
       throw err;
@@ -264,6 +264,7 @@ const GraphQLResolver = {
         path: 'followers',
         select: ['username', 'emailAddress'],
       })
+      .lean(true)
       .exec();
 
     if (!userWithDetails) {
@@ -287,9 +288,8 @@ const GraphQLResolver = {
         path: 'following',
         select: ['username', 'emailAddress'],
       })
+      .lean(true)
       .exec();
-
-    console.log(userWithDetails);
 
     if (!userWithDetails) {
       throw new Error(errName.USER_NOT_FOUND);

@@ -9,7 +9,6 @@ const UserRelated: string = `
         _id:ID!
         username:String!
         emailAddress:String!
-        dateCreated:Int
         followers:[ID]
         following:[ID]
         createdAt:String
