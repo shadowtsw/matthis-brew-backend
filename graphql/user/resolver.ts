@@ -255,6 +255,54 @@ const GraphQLResolver = {
 
     return `Let him go, you aren´t further following ${targetUser.username}`;
   },
+  getAllFollowerDetails: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const userWithDetails = await User.findById(req.user._id)
+      .populate({
+        path: 'followers',
+        select: ['username', 'emailAddress'],
+      })
+      .exec();
+
+    if (!userWithDetails) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    const { followers } = userWithDetails;
+
+    if (!followers) {
+      throw new Error(errName.DEFAULT);
+    }
+
+    return userWithDetails.followers;
+  },
+  getAllFollowingDetails: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const userWithDetails = await User.findById(req.user._id)
+      .populate({
+        path: 'following',
+        select: ['username', 'emailAddress'],
+      })
+      .exec();
+
+    console.log(userWithDetails);
+
+    if (!userWithDetails) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    const { following } = userWithDetails;
+
+    if (!following) {
+      throw new Error(errName.DEFAULT);
+    }
+
+    return userWithDetails.following;
+  },
 };
 
 export default GraphQLResolver;

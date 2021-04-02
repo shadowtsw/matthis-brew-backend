@@ -15,11 +15,6 @@ const UserRelated: string = `
         createdAt:String
         updatedAt:String
     }
-    type UserMeta {
-        token:String
-        refreshToken:String
-        password:String
-    }
 
     input CreateUserInput {
         username:String!
@@ -31,6 +26,12 @@ const UserRelated: string = `
     input UpdateUserInput {
         password:String
         confirmPassword:String
+        emailAddress:String
+    }
+
+    type FollowerDetail {
+        _id:ID!
+        username:String!
         emailAddress:String
     }
 
@@ -49,6 +50,8 @@ const GraphQLSchema = buildSchema(`
     type RootQuery {
         getUserDetails:User!
         logout:String!
+        getAllFollowerDetails:[FollowerDetail]!
+        getAllFollowingDetails:[FollowerDetail]!
     }
     
     type RootMutation {
