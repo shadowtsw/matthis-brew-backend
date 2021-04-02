@@ -51,6 +51,14 @@ const GraphQLResolver = {
       if (findUser) {
         throw new Error(errName.USER_OR_EMAIL_EXISTS);
       }
+      const findUserByEmail = await User.findOne({
+        emailAddress: emailAddress,
+      }).exec();
+
+      if (findUserByEmail) {
+        throw new Error(errName.USER_OR_EMAIL_EXISTS);
+      }
+
       if (password !== confirmPassword) {
         throw new Error(errName.PASSWORD_MISMATCH);
       }
@@ -216,7 +224,7 @@ const GraphQLResolver = {
       throw new Error(errName.USER_NOT_FOUND);
     }
 
-    req.user.follows.push(targetUser);
+    req.user.following.push(targetUser);
     targetUser.followers.push(req.user);
 
     await req.user.save();
@@ -234,12 +242,12 @@ const GraphQLResolver = {
       throw new Error(errName.USER_NOT_FOUND);
     }
 
-    req.user.follows = req.user.follows.filter((id: any) => {
-      return id !== userID;
+    req.user.following = req.user.following.filter((id: any) => {
+      return id.toString() !== userID;
     });
 
     targetUser.followers = targetUser.followers.filter((id: any) => {
-      return id !== req.user.id;
+      return id.toString() !== req.user.id;
     });
 
     await req.user.save();
