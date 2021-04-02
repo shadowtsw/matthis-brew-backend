@@ -48,7 +48,10 @@ Server.use(
     rootValue: mergeResolvers([GraphQLUserResolver]),
     graphiql: true,
     customFormatErrorFn(err: any) {
-      const error = getError(err.message || 'DEFAULT');
+      let error = getError(err.message || 'DEFAULT');
+      if (!error) {
+        return err;
+      }
       return { message: error.message, status: error.statusCode };
     },
   })
@@ -61,6 +64,9 @@ Server.get('/service-worker.js', (req, res) => {
 Server.use((error: any, req: Request, res: Response, next: NextFunction) => {
   const err = getError(error.message);
   const data = error.data;
+  if (!err) {
+    res.status(500).json(error);
+  }
   res.status(err.statusCode).json({ message: err.message, data: data });
 });
 
