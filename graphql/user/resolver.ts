@@ -219,8 +219,8 @@ const GraphQLResolver = {
     req.user.follows.push(targetUser);
     targetUser.followers.push(req.user);
 
-    req.user.save();
-    targetUser.save();
+    await req.user.save();
+    await targetUser.save();
 
     return `Success, you are now following ${targetUser.username} !`;
   },
@@ -242,8 +242,8 @@ const GraphQLResolver = {
       return id !== req.user.id;
     });
 
-    req.user.save();
-    targetUser.save();
+    await req.user.save();
+    await targetUser.save();
 
     return `Let him go, you aren´t further following ${targetUser.username}`;
   },
