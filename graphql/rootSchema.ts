@@ -12,6 +12,8 @@ const UserRelated: string = `
         dateCreated:Int
         followers:[ID]
         following:[ID]
+        createdAt:String
+        updatedAt:String
     }
     type UserMeta {
         token:String
@@ -30,9 +32,9 @@ const UserRelated: string = `
         password:String
         confirmPassword:String
         emailAddress:String
-        followers:[ID]
-        following:[ID]
     }
+
+
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -52,6 +54,9 @@ const GraphQLSchema = buildSchema(`
     type RootMutation {
         createUser(createUserInput:CreateUserInput!):String!
         updateUser(updateUserInput:UpdateUserInput!):User!
+
+        followUser(followUserID:ID!):String!
+        unFollow(userID:ID!):String!
 
         login(username:String! password:String!):TokenObject!
         refreshToken(refreshToken:String!):TokenObject!

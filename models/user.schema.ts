@@ -1,51 +1,53 @@
 import { Schema, model, Types, Document, Model } from 'mongoose';
 
-const userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  emailAddress: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  dateCreated: {
-    type: String,
-    required: true,
-  },
-  meta: {
-    password: {
+const userSchema = new Schema(
+  {
+    username: {
       type: String,
       required: true,
+      unique: true,
     },
-    token: {
+    emailAddress: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    dateCreated: {
       type: String,
       required: false,
-      unique: true,
-      default: new Date().getTime(),
+      default: null,
     },
-    refreshToken: {
-      type: String,
-      required: false,
-      unique: true,
-      default: new Date().getTime(),
+    meta: {
+      password: {
+        type: String,
+        required: true,
+      },
+      token: {
+        type: String,
+        required: false,
+        default: null,
+      },
+      refreshToken: {
+        type: String,
+        required: false,
+        default: null,
+      },
     },
+    followers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    following: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
-  followers: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  ],
-  following: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  ],
-});
+  { timestamps: true }
+);
 
 interface UserProps extends Document {
   username: string;
@@ -58,7 +60,10 @@ interface UserProps extends Document {
   };
   followers: Array<Types.ObjectId>;
   following: Array<Types.ObjectId>;
-  _doc: Types.Embedded;
+  _doc: Types.EmbeddedDocument;
+  _v: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 type StringIndexer<T> = {

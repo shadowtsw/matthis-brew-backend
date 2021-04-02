@@ -10,6 +10,7 @@ import {
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
 import { errName } from '../../utils/error/error-handler';
 import validator from 'validator';
+import { filter } from 'compression';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
@@ -70,7 +71,7 @@ const GraphQLResolver = {
     }
   },
   updateUser: async function ({ updateUserInput }: any, req: any) {
-    const { confirmPassword, ...dataWithoutConfirm } = updateUserInput;
+    const { confirmPassword, ...dataWithoutPassConfirm } = updateUserInput;
 
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
@@ -107,18 +108,24 @@ const GraphQLResolver = {
         throw new Error(errName.USER_NOT_FOUND);
       }
 
-      const { password, ...remainingProps } = dataWithoutConfirm;
-
-      if (password) {
-        findUser.meta.password = await hashedPassword(updateUserInput.password);
+      if (dataWithoutPassConfirm) {
+        console.log(dataWithoutPassConfirm);
+        const { password, ...newProps } = dataWithoutPassConfirm;
+        const {
+          _v,
+          _id,
+          createdAt,
+          updatedAt,
+          ...oldDocProps
+        } = findUser.toObject();
+        if (password) {
+          newProps.passwort = await hashedPassword(newProps.password);
+        }
+        let updatedProps = { ...oldDocProps, ...newProps };
+        User.updateOne({ _id: req.user._id }, updatedProps).exec();
       }
 
-      if (remainingProps) {
-        let updatedProps = { ...findUser._doc, ...remainingProps };
-        findUser._doc = updatedProps;
-      }
-
-      return await findUser.save();
+      return await User.findById(req.user._id).exec();
     } catch (err) {
       throw err;
     }
@@ -197,6 +204,48 @@ const GraphQLResolver = {
     } catch (err) {
       throw err;
     }
+  },
+  followUser: async function ({ followUserID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    const targetUser = await User.findById(followUserID).exec();
+
+    if (!targetUser) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    req.user.follows.push(targetUser);
+    targetUser.followers.push(req.user);
+
+    req.user.save();
+    targetUser.save();
+
+    return `Success, you are now following ${targetUser.username} !`;
+  },
+  unFollow: async function ({ userID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const targetUser = await User.findById(userID).exec();
+
+    if (!targetUser) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    req.user.follows = req.user.follows.filter((id: any) => {
+      return id !== userID;
+    });
+
+    targetUser.followers = targetUser.followers.filter((id: any) => {
+      return id !== req.user.id;
+    });
+
+    req.user.save();
+    targetUser.save();
+
+    return `Let him go, you aren´t further following ${targetUser.username}`;
   },
 };
 
