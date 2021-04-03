@@ -6,16 +6,25 @@ export const messageTemplate = (
   accountID: string,
   emailToken: string
 ) => {
-  return `
-    Subject: Success !!
-    Please verify your email for ${greeter}
-    
-    Hello ${username},
-    Follow this link to verifiy your email address.
-    ${linkToAuthEndpoint + '/verify/verifyAccount'}/${accountID}/${emailToken}
-
-    If you didn't ask to verify this adress, you can ignore this email.
-    Thanks,
-    Your ${greeter} team
-`;
+  //prettier-ignore
+  return `Success !!  Hello ${username}, follow this link to verifiy your email address: ${linkToAuthEndpoint + '/verify/verifyAccount'}/${accountID}/${emailToken}`;
 };
+
+// export const messageTemplate = (
+//   username: string,
+//   accountID: string,
+//   emailToken: string
+// ) => {
+//   return `
+//     Subject: Success !!
+//     Please verify your email for ${greeter}
+
+//     Hello ${username},
+//     Follow this link to verifiy your email address.
+//     ${linkToAuthEndpoint + '/verify/verifyAccount'}/${accountID}/${emailToken}
+
+//     If you didn't ask to verify this adress, you can ignore this email.
+//     Thanks,
+//     Your ${greeter} team
+// `;
+// };
