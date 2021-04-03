@@ -1,5 +1,5 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-const LoginPage = process.env.LOGIN_PAGE || 'http://localhost:3000/graphql';
+const LoginPage = process.env.LOGIN_URL || 'http://localhost:3000/graphql';
 
 console.log('Enviroment:', process.env.NODE_ENV);
 
