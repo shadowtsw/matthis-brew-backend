@@ -18,6 +18,7 @@ export const errName = {
   LOGOUT_ERROR: 'LOGOUT_ERROR',
   INVALID_EMAIL: 'INVALID_EMAIL',
   INVALID_PASS: 'INVALID_PASS',
+  MISSING_VALIDATION: 'MISSING_VALIDATION',
 };
 
 const errorType: ErrorTypes = {
@@ -60,6 +61,10 @@ const errorType: ErrorTypes = {
   },
   INVALID_PASS: {
     message: 'Passwort is missing or must be at least 6 characters long',
+    statusCode: 500,
+  },
+  MISSING_VALIDATION: {
+    message: 'Please validate your email first !',
     statusCode: 500,
   },
 };

@@ -6,6 +6,26 @@ const secretKey =
 const refreshKey =
   'kldsfgh käaebrtöoihjearlkfgasädpövkbisodfj0097u0ßaw3t563523213541er gbdweag';
 const TOKEN_EXPIRES: number = Number(process.env.TOKEN_EXPRES_MIN) || 15;
+const verifyKey = 'koödsgjilkdsfh6+3663363,d 0445444dddddddddd';
+
+export const createVerifyToken = (data: { accountID: string }) => {
+  return jwt.sign(data, verifyKey, { expiresIn: 60 * 60 });
+};
+
+export const verifyEmailToken = (emailToken: string) => {
+  let dataObject = null as { accountID: string } | null;
+
+  jwt.verify(emailToken, verifyKey, (err, data: any) => {
+    if (err) {
+      dataObject = null;
+    }
+    if (data) {
+      dataObject = data;
+    }
+  });
+
+  return dataObject;
+};
 
 const createToken = (data: {
   username: string;

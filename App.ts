@@ -1,4 +1,5 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+const LoginPage = process.env.LOGIN_PAGE || 'http://localhost:3000/graphql';
 
 console.log('Enviroment:', process.env.NODE_ENV);
 
@@ -12,6 +13,7 @@ import mongoose from 'mongoose';
 
 import { default as SystemRouter } from './routes/system.routes';
 import { default as FileRouter } from './routes/fileHandler.routes';
+import { default as VerifyRouter } from './routes/verify.routes';
 import { graphqlHTTP } from 'express-graphql';
 import { default as GraphQLGlobalSchema } from './graphql/rootSchema';
 import { default as GraphQLUserResolver } from './graphql/user/resolver';
@@ -38,7 +40,11 @@ Server.use('/', express.static('build'));
 
 Server.use(authMiddleWare);
 
+Server.get('/fastforward', (req, res, next) => {
+  res.status(200).redirect(LoginPage);
+});
 Server.use('/status', SystemRouter);
+Server.use('/verify', VerifyRouter);
 Server.use(
   '/graphql',
   graphqlHTTP({

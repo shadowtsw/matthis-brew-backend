@@ -32,6 +32,16 @@ const userSchema = new Schema(
         required: false,
         default: null,
       },
+      isVerified: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+      resetToken: {
+        type: String,
+        required: false,
+        default: null,
+      },
     },
     followers: [
       {
@@ -57,6 +67,8 @@ interface UserProps extends Document {
     password: string;
     token?: string;
     refreshToken?: string;
+    isVerified: boolean;
+    resetToken: string | null;
   };
   followers: Array<Types.ObjectId>;
   following: Array<Types.ObjectId>;

@@ -10,7 +10,8 @@ import {
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
 import { errName } from '../../utils/error/error-handler';
 import validator from 'validator';
-import { filter } from 'compression';
+import { messageTemplate } from '../../utils/verify/verifyMessage-template';
+import { createVerifyToken } from '../../utils/jwt/jwt';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
@@ -86,7 +87,19 @@ const GraphQLResolver = {
       });
 
       await newUser.save();
-      return `User with name:${username} was successfully created !`;
+
+      const emailToken = await createVerifyToken({ accountID: newUser._id });
+
+      const message = messageTemplate(
+        newUser.username,
+        newUser._id,
+        emailToken
+      );
+
+      console.log(message);
+
+      //prettier ignore
+      return message;
     } catch (err) {
       throw err;
     }
@@ -148,6 +161,9 @@ const GraphQLResolver = {
       const comparePass = await comparePassword(password, user.meta.password);
       if (!comparePass) {
         throw new Error(errName.PASSWORD_MISMATCH);
+      }
+      if (!user.meta.isVerified) {
+        throw new Error(errName.MISSING_VALIDATION);
       }
       const authObject = {
         token: createToken({
