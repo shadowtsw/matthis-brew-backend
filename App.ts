@@ -1,4 +1,5 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
 const LoginPage = process.env.LOGIN_URL || 'http://localhost:3000/graphql';
 
 console.log('Enviroment:', process.env.NODE_ENV);
@@ -23,12 +24,35 @@ import { getError } from './utils/error/error-handler';
 
 const Server = express();
 
+//QUERY-Example
+// const query = {
+//   query: `mutation TestMutate($username:String,$password:String,$confirmPassword:String,$emailAddress:String){
+//     createUser(createUserInput:{
+//       username:$username
+//       password:$password
+//       emailAddress:$emailAddress
+//       confirmPassword:$confirmPassword
+//     })
+//   }`,
+//   variables: {
+//     username: 'Timmm',
+//     password: 'Timmm',
+//     emailAddress: 'timm@timmy.de',
+//     confirmPassword: 'Timmm',
+//   },
+// };
+
+// console.log(JSON.stringify(query));
+
 // Server.use(helmet());
 
 Server.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-  res.setHeader('Access-Control-Allow-Headers', 'text/html, application/json');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   next();
 });
 
