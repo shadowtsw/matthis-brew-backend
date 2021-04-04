@@ -1,6 +1,6 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-const LoginPage = process.env.LOGIN_URL || 'http://localhost:3000/graphql';
+const LOGIN_URL = process.env.LOGIN_URL || 'http://localhost:3000/graphql';
 
 console.log('Enviroment:', process.env.NODE_ENV);
 
@@ -60,12 +60,14 @@ Server.use(compression());
 Server.use(bodyParser.urlencoded({ extended: false }));
 Server.use(bodyParser.json());
 
+Server.set('view engine', 'ejs');
+Server.set('views', 'pages');
 Server.use('/', express.static('build'));
 
 Server.use(authMiddleWare);
 
 Server.get('/fastforward', (req, res, next) => {
-  res.status(200).redirect(LoginPage);
+  res.status(200).redirect(LOGIN_URL);
 });
 Server.use('/status', SystemRouter);
 Server.use('/verify', VerifyRouter);

@@ -5,6 +5,7 @@ import { errName } from '../utils/error/error-handler';
 import User from '../models/user.schema';
 import path from 'path';
 import { messageTemplate } from '../utils/verify/verifyMessage-template';
+const LOGIN_URL = process.env.LOGIN_URL || 'http://localhost:3000/graphql';
 
 export const verifyAccount: ExpressMiddleWare = async (req, res, next) => {
   const accountID = req.params.accountID;
@@ -28,9 +29,7 @@ export const verifyAccount: ExpressMiddleWare = async (req, res, next) => {
     activateAccount.meta.isVerified = true;
     activateAccount.meta.resetToken = null;
     await activateAccount.save();
-    res
-      .status(200)
-      .sendFile(path.resolve(__dirname, '..', 'pages', 'verifiedPage.html'));
+    res.status(200).render('verifiedPage', { fastForward: LOGIN_URL });
   } catch (err) {
     return next(err);
   }
