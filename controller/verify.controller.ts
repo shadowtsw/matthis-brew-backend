@@ -32,7 +32,7 @@ export const verifyAccount: ExpressMiddleWare = async (req, res, next) => {
     res.status(200).render('verifiedPage', {
       fastForward: LOGIN_URL,
       username: activateAccount.username,
-      emailAdress: activateAccount.emailAddress,
+      emailAddress: activateAccount.emailAddress,
     });
   } catch (err) {
     return next(err);

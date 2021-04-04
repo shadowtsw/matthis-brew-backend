@@ -80,7 +80,7 @@ Server.use(
     rootValue: mergeResolvers([GraphQLUserResolver]),
     graphiql: true,
     customFormatErrorFn(err: any) {
-      let error = getError(err.message || 'DEFAULT');
+      let error = getError(err.message);
       if (!error) {
         return err;
       }

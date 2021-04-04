@@ -7,7 +7,7 @@ export const messageTemplate = (
   emailToken: string
 ) => {
   //prettier-ignore
-  return `Success !!  Hello ${username}, follow this link to verifiy your email address: ${linkToAuthEndpoint + '/verify/verifyAccount'}/${accountID}/${emailToken}`;
+  return `Success !!  Hello ${username}, follow this link to verifiy your email address: ${linkToAuthEndpoint + 'verify/verifyAccount'}/${accountID}/${emailToken}`;
 };
 
 // export const messageTemplate = (
