@@ -31,10 +31,16 @@ const UserRelated: string = `
     type FollowerDetail {
         _id:ID!
         username:String!
-        emailAddress:String
+        publicEmail:String
+        avatarURI:String
     }
 
-
+    type GuestDetail {
+        _id:ID!
+        username:String!
+        publicEmail:String
+        avatarURI:String
+    }
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -51,6 +57,7 @@ const GraphQLSchema = buildSchema(`
         logout:String!
         getAllFollowerDetails:[FollowerDetail]!
         getAllFollowingDetails:[FollowerDetail]!
+        getUserList(filterByName:String count:Int):[GuestDetail]!
     }
     
     type RootMutation {

@@ -81,6 +81,10 @@ const GraphQLResolver = {
         username: username,
         emailAddress: emailAddress.toLowerCase(),
         dateCreated: new Date().getTime().toString(),
+        settings: {
+          showPublicEmail: false,
+        },
+        publicEmail: null,
         meta: {
           password: secretPassword,
         },
@@ -278,7 +282,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'followers',
-        select: ['username', 'emailAddress'],
+        select: ['username', 'publicEmail'],
       })
       .lean(true)
       .exec();
@@ -302,7 +306,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'following',
-        select: ['username', 'emailAddress'],
+        select: ['username', 'publicEmail'],
       })
       .lean(true)
       .exec();
@@ -318,6 +322,41 @@ const GraphQLResolver = {
     }
 
     return userWithDetails.following;
+  },
+  getUserList: async function ({ filterByName, count }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      if (!filterByName) {
+        const query = User.find();
+        query.select('_id username puplicMail');
+        query.getFilter();
+        if (count) {
+          query.limit(count);
+          query.getFilter();
+        }
+        const showResult = await query.lean(true).exec();
+        return showResult;
+        // username & puplicMail & avatar
+      }
+
+      if (filterByName) {
+        const regExp = new RegExp(filterByName);
+        const query = User.find({ username: regExp }).select(
+          '_id username puplicMail'
+        );
+        query.getFilter();
+        if (count) {
+          query.limit(count);
+          query.getFilter();
+        }
+        const showResult = await query.lean(true).exec();
+        return showResult;
+      }
+    } catch (err) {
+      throw err;
+    }
   },
 };
 
