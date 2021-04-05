@@ -19,6 +19,9 @@ const UserRelated: string = `
 
     type UserSettings {
         showPublicEmail:Boolean!
+        signature:String
+        description:String
+        darkmode:Bollean
     }
 
     input CreateUserInput {
@@ -50,6 +53,9 @@ const UserRelated: string = `
 
     input InputSettings {
         showPublicEmail:Boolean
+        signature:String
+        description:String
+        darkmode:Boolean
     }
 `;
 

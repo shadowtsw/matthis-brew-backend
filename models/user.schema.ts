@@ -43,7 +43,7 @@ const userSchema = new Schema(
         required: false,
         default: '',
       },
-      theme: {
+      darkmode: {
         type: Boolean,
         required: false,
         default: false,
@@ -125,7 +125,7 @@ interface UserProps extends Document {
     avatarURI: string;
     signature: string;
     description: string;
-    theme: string;
+    darkmode: boolean;
   };
   recipes: Array<Types.ObjectId>;
   favouriteRecipes: Array<Types.ObjectId>;

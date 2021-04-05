@@ -375,9 +375,21 @@ const GraphQLResolver = {
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
-    const { showPublicEmail } = inputSettings;
+    const { showPublicEmail, signature, description, darkmode } = inputSettings;
 
     try {
+      if (darkmode !== undefined && darkmode !== null) {
+        req.user.darkmode = darkmode;
+      }
+
+      if (signature) {
+        req.user.settings.signature = signature;
+      }
+
+      if (description) {
+        req.user.settings.description = description;
+      }
+
       if (showPublicEmail !== undefined && showPublicEmail !== null) {
         if (showPublicEmail) {
           req.user.settings.showPublicEmail = showPublicEmail;
