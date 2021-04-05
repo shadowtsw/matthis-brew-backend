@@ -17,6 +17,30 @@ const userSchema = new Schema(
       required: false,
       default: null,
     },
+    publicEmail:{
+      type:String,
+      required: false,
+      default:null
+    },
+    settings:{
+      showPublicEmail:{ 
+        type: Boolean,
+        required:false,
+        default:false
+      }
+    },
+    recipes:[
+      {
+        type:Schema.Types.ObjectId,
+        ref:'Recipes'
+      }
+    ],
+    favourites:[
+      {
+        type:Schema.Types.ObjectId,
+        ref:'Recipes'
+      }
+    ],
     meta: {
       password: {
         type: String,
@@ -63,6 +87,12 @@ interface UserProps extends Document {
   username: string;
   emailAddress: string;
   dateCreated: string;
+  publicEmail:string|null;
+  settings:{
+    showPublicEmail:boolean;
+  };
+  recipes:Array<Types.ObjectId>;
+  favourites:Array<Types.ObjectId>;
   meta: {
     password: string;
     token?: string;
