@@ -1,7 +1,27 @@
 import { buildSchema } from 'graphql';
 
-//meta entfernt
-//        meta: UserMeta
+const RecipeRelated: string = `
+    type Recipe {
+        recipeName:String!
+        picture:String
+        ingredients:[IngredientList]!
+        likes:Int
+        comments:[Comments]!
+        createdAt:String
+        updatedAt:String
+    }
+
+    type IngredientList {
+        ingredient:String!
+        value:Int!
+        unit:String!
+    }
+
+    type Comments {
+        userId:ID!
+        text:String!
+    }
+`;
 
 const UserRelated: string = `
 
@@ -70,9 +90,12 @@ const GraphQLSchema = buildSchema(`
 
     type RootQuery {
         getUserDetails:User!
+        
         logout:String!
+        
         getAllFollowerDetails:[FollowerDetail]!
         getAllFollowingDetails:[FollowerDetail]!
+        
         getUserList(filterByName:String count:Int):[UserFromList]!
     }
     
