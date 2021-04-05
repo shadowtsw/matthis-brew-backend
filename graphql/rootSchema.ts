@@ -21,7 +21,7 @@ const UserRelated: string = `
         showPublicEmail:Boolean!
         signature:String
         description:String
-        darkmode:Bollean
+        darkmode:Boolean
     }
 
     input CreateUserInput {
