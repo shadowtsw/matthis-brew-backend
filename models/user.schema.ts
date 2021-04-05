@@ -17,55 +17,55 @@ const userSchema = new Schema(
       required: false,
       default: null,
     },
-    publicEmail:{
-      type:String,
+    publicEmail: {
+      type: String,
       required: false,
-      default:null
+      default: null,
     },
-    settings:{
-      showPublicEmail:{ 
+    settings: {
+      showPublicEmail: {
         type: Boolean,
-        required:false,
-        default:false
+        required: false,
+        default: false,
       },
-      avatarURI:{
-        type:String,
-        required:false,
-        default:""
+      avatarURI: {
+        type: String,
+        required: false,
+        default: '',
       },
-      signature:{
-        type:String,
-        required:false,
-        default:""
+      signature: {
+        type: String,
+        required: false,
+        default: '',
       },
-      description:{
-        type:String,
-        required:false,
-        default:""
+      description: {
+        type: String,
+        required: false,
+        default: '',
       },
-      theme:{
-        type:Boolean,
-        required:false,
-        default:false
+      theme: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
-    recipes:[
+    recipes: [
       {
-        type:Schema.Types.ObjectId,
-        ref:'Recipes'
-      }
+        type: Schema.Types.ObjectId,
+        ref: 'Recipe',
+      },
     ],
-    favourites:[
+    favouriteRecipes: [
       {
-        type:Schema.Types.ObjectId,
-        ref:'Recipes'
-      }
+        type: Schema.Types.ObjectId,
+        ref: 'Recipe',
+      },
     ],
-    savedRecipes:[
+    savedRecipes: [
       {
-        type:Schema.Types.ObjectId,
-        ref:'Recipes'
-      }
+        type: Schema.Types.ObjectId,
+        ref: 'Recipe',
+      },
     ],
     meta: {
       password: {
@@ -105,6 +105,12 @@ const userSchema = new Schema(
         ref: 'User',
       },
     ],
+    favouriteUsers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -113,17 +119,17 @@ interface UserProps extends Document {
   username: string;
   emailAddress: string;
   dateCreated: string;
-  publicEmail:string|null;
-  settings:{
-    showPublicEmail:boolean;
-    avatarURI:string;
-    signature:string;
-    description:string;
-    theme:string;
+  publicEmail: string | null;
+  settings: {
+    showPublicEmail: boolean;
+    avatarURI: string;
+    signature: string;
+    description: string;
+    theme: string;
   };
-  recipes:Array<Types.ObjectId>;
-  favourites:Array<Types.ObjectId>;
-  savedRecipes:Array<Types.ObjectId>;
+  recipes: Array<Types.ObjectId>;
+  favouriteRecipes: Array<Types.ObjectId>;
+  savedRecipes: Array<Types.ObjectId>;
   meta: {
     password: string;
     token?: string;
@@ -133,17 +139,18 @@ interface UserProps extends Document {
   };
   followers: Array<Types.ObjectId>;
   following: Array<Types.ObjectId>;
+  favouriteUsers: Array<Types.ObjectId>;
   _doc: Types.EmbeddedDocument;
-  _v: number;
+  __v: number;
   createdAt: string;
   updatedAt: string;
 }
 
-type StringIndexer<T> = {
-  [K in keyof T]: T[K];
+type StringIndexer = {
+  [K in keyof UserProps]: UserProps[K];
 };
 
-export type UserInterface = StringIndexer<UserProps> & UserProps;
+export type UserInterface = StringIndexer & UserProps;
 
 const User: Model<UserInterface> = model('User', userSchema);
 

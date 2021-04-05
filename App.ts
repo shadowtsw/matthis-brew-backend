@@ -24,26 +24,6 @@ import { getError } from './utils/error/error-handler';
 
 const Server = express();
 
-//QUERY-Example
-// const query = {
-//   query: `mutation TestMutate($username:String,$password:String,$confirmPassword:String,$emailAddress:String){
-//     createUser(createUserInput:{
-//       username:$username
-//       password:$password
-//       emailAddress:$emailAddress
-//       confirmPassword:$confirmPassword
-//     })
-//   }`,
-//   variables: {
-//     username: 'Timmm',
-//     password: 'Timmm',
-//     emailAddress: 'timm@timmy.de',
-//     confirmPassword: 'Timmm',
-//   },
-// };
-
-// console.log(JSON.stringify(query));
-
 // Server.use(helmet());
 
 Server.use((req, res, next) => {
