@@ -330,21 +330,28 @@ const GraphQLResolver = {
     try {
       if (!filterByName) {
         const query = User.find();
-        query.select('_id username puplicMail');
+        query.select('_id username puplicEmail settings');
         query.getFilter();
         if (count) {
           query.limit(count);
           query.getFilter();
         }
         const showResult = await query.lean(true).exec();
-        return showResult;
+
+        const modifiedArray = showResult.map((entry) => {
+          const { username, publicEmail, _id } = entry;
+          const { avatarURI } = entry.settings;
+          return { username, publicEmail, _id, avatarURI };
+        });
+
+        return modifiedArray;
         // username & puplicMail & avatar
       }
 
       if (filterByName) {
         const regExp = new RegExp(filterByName);
         const query = User.find({ username: regExp }).select(
-          '_id username puplicMail'
+          '_id username puplicEmail settings'
         );
         query.getFilter();
         if (count) {
@@ -352,7 +359,13 @@ const GraphQLResolver = {
           query.getFilter();
         }
         const showResult = await query.lean(true).exec();
-        return showResult;
+        const modifiedArray = showResult.map((entry) => {
+          const { username, publicEmail, _id } = entry;
+          const { avatarURI } = entry.settings;
+          return { username, publicEmail, _id, avatarURI };
+        });
+
+        return modifiedArray;
       }
     } catch (err) {
       throw err;
