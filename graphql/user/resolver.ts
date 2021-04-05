@@ -371,6 +371,26 @@ const GraphQLResolver = {
       throw err;
     }
   },
+  setUserSettings: async function ({ inputSettings }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const { showPublicEmail } = inputSettings;
+
+    try {
+      if (showPublicEmail !== undefined && showPublicEmail !== null) {
+        if (showPublicEmail) {
+          req.user.settings.showPublicEmail = showPublicEmail;
+          req.user.publicEmail = req.user.emailAddress;
+        } else if (showPublicEmail === false) {
+          req.user.publicEmail = null;
+        }
+      }
+      return await req.user.save();
+    } catch (err) {
+      throw err;
+    }
+  },
 };
 
 export default GraphQLResolver;

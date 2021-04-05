@@ -13,6 +13,12 @@ const UserRelated: string = `
         following:[ID]
         createdAt:String
         updatedAt:String
+        settings:UserSettings
+        publicEmail:String
+    }
+
+    type UserSettings {
+        showPublicEmail:Boolean!
     }
 
     input CreateUserInput {
@@ -41,6 +47,10 @@ const UserRelated: string = `
         publicEmail:String
         avatarURI:String
     }
+
+    input InputSettings {
+        showPublicEmail:Boolean
+    }
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -63,6 +73,8 @@ const GraphQLSchema = buildSchema(`
     type RootMutation {
         createUser(createUserInput:CreateUserInput!):String!
         updateUser(updateUserInput:UpdateUserInput!):User!
+
+        setUserSettings(inputSettings:InputSettings):User!
 
         followUser(followUserID:ID!):String!
         unFollow(userID:ID!):String!
