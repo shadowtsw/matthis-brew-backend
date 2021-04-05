@@ -27,7 +27,27 @@ const userSchema = new Schema(
         type: Boolean,
         required:false,
         default:false
-      }
+      },
+      avatarURI:{
+        type:String,
+        required:false,
+        default:""
+      },
+      signature:{
+        type:String,
+        required:false,
+        default:""
+      },
+      description:{
+        type:String,
+        required:false,
+        default:""
+      },
+      theme:{
+        type:Boolean,
+        required:false,
+        default:false
+      },
     },
     recipes:[
       {
@@ -36,6 +56,12 @@ const userSchema = new Schema(
       }
     ],
     favourites:[
+      {
+        type:Schema.Types.ObjectId,
+        ref:'Recipes'
+      }
+    ],
+    savedRecipes:[
       {
         type:Schema.Types.ObjectId,
         ref:'Recipes'
@@ -90,9 +116,14 @@ interface UserProps extends Document {
   publicEmail:string|null;
   settings:{
     showPublicEmail:boolean;
+    avatarURI:string;
+    signature:string;
+    description:string;
+    theme:string;
   };
   recipes:Array<Types.ObjectId>;
   favourites:Array<Types.ObjectId>;
+  savedRecipes:Array<Types.ObjectId>;
   meta: {
     password: string;
     token?: string;
