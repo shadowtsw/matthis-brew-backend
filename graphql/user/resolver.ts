@@ -309,7 +309,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'followers',
-        select: ['username', 'publicEmail'],
+        select: ['_id', 'username', 'publicEmail'],
       })
       .lean(true)
       .exec();
@@ -333,7 +333,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'following',
-        select: ['username', 'publicEmail'],
+        select: ['_id', 'username', 'publicEmail'],
       })
       .lean(true)
       .exec();
