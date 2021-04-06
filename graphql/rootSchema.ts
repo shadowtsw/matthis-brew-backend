@@ -104,6 +104,24 @@ const UserRelated: string = `
         publicEmail:String
         recipes:[Recipe]!
     }
+
+    type SingleUser {
+        _id:ID!
+        username:String
+        publicEmail:String
+        followers:[UserFollower]!
+        following:[UserFollowing]!
+    }
+
+    type UserFollower {
+        _id:ID!
+        username:String
+    }
+    
+    type UserFollowing {
+        _id:ID!
+        username:String
+    }
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -119,6 +137,8 @@ const GraphQLSchema = buildSchema(`
 
     type RootQuery {
         getUserDetails:User!
+
+        fetchSingleUser(userID:ID!):SingleUser!
         
         logout:String!
         
@@ -151,8 +171,8 @@ const GraphQLSchema = buildSchema(`
 
         addRecipe(addRecipeInput:RecipeInput):Recipe!
 
-        like:(recipeID:ID!):String!
-        disLike:(recipeID:ID!):String!
+        like(recipeID:ID!):String!
+        disLike(recipeID:ID!):String!
     }
 
     schema {

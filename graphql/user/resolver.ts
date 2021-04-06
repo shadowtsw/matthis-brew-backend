@@ -15,10 +15,10 @@ import { createVerifyToken } from '../../utils/jwt/jwt';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
     try {
-      if (!req.user) {
-        throw new Error(errName.AUTH_FAILED);
-      }
       const findUser = await User.findById(req.user._id).lean(true).exec();
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
@@ -34,6 +34,30 @@ const GraphQLResolver = {
       ).toISOString();
 
       return relevantDoc;
+    } catch (err) {
+      throw err;
+    }
+  },
+  fetchSingleUser: async function ({ userID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      const singleUser = await User.findById(userID)
+        .populate({
+          path: 'follower following',
+          select: ['_id', 'username'],
+        })
+        .lean(true)
+        .exec();
+
+      if (!singleUser) {
+        throw new Error(errName.USER_NOT_FOUND);
+      }
+
+      const { _id, username, publicEmail, followers, following } = singleUser;
+
+      return { _id, username, publicEmail, followers, following };
     } catch (err) {
       throw err;
     }
