@@ -18,5 +18,6 @@
 - adds related graphql-methods
 - adds Userlist-Functionality
   - List of users can be fetched
-    - with regEx search pattern
-    - with limit of count  
+    - without parameter to show full available list
+    - with regEx search pattern to filter out usernames
+    - with limit of count
