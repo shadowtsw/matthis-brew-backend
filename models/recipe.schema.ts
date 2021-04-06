@@ -2,6 +2,10 @@ import { Schema, model, Types, Document, Model } from 'mongoose';
 
 const recipeSchema = new Schema(
   {
+    userID: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     recipeName: {
       type: String,
       required: true,
@@ -36,9 +40,26 @@ const recipeSchema = new Schema(
         unique: true,
       },
     ],
+    totalLikes: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    disLikes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true,
+      },
+    ],
+    totalDislikes: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     comments: [
       {
-        userId: {
+        userID: {
           type: Schema.Types.ObjectId,
           ref: 'User',
         },
@@ -53,9 +74,13 @@ const recipeSchema = new Schema(
 );
 
 interface RecipeProps extends Document {
+  userID: Types.ObjectId;
   recipeName: string;
   picture: string;
   likes: Types.ObjectId;
+  totalLikes: number;
+  disLikes: Types.ObjectId;
+  totalDislikes: number;
   comments: [{ userId: Types.ObjectId; text: string }];
   _doc: Types.EmbeddedDocument;
   __v: number;

@@ -18,6 +18,7 @@ import { default as VerifyRouter } from './routes/verify.routes';
 import { graphqlHTTP } from 'express-graphql';
 import { default as GraphQLGlobalSchema } from './graphql/rootSchema';
 import { default as GraphQLUserResolver } from './graphql/user/resolver';
+import { default as GraphQLRecipeResolver } from './graphql/recipe/resolver';
 import { mergeSchemas, mergeResolvers } from 'graphql-tools';
 import { authMiddleWare } from './middleware/authenticate';
 import { getError } from './utils/error/error-handler';
@@ -57,7 +58,7 @@ Server.use(
     schema: mergeSchemas({
       schemas: [GraphQLGlobalSchema],
     }),
-    rootValue: mergeResolvers([GraphQLUserResolver]),
+    rootValue: mergeResolvers([GraphQLUserResolver, GraphQLRecipeResolver]),
     graphiql: true,
     customFormatErrorFn(err: any) {
       let error = getError(err.message);

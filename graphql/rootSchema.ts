@@ -2,10 +2,13 @@ import { buildSchema } from 'graphql';
 
 const RecipeRelated: string = `
     type Recipe {
+        _id:ID!
+        userID:ID!
         recipeName:String!
         picture:String
         ingredients:[IngredientList]!
-        likes:Int
+        totalLikes:Int
+        totalDisLikes:Int
         comments:[Comments]!
         createdAt:String
         updatedAt:String
@@ -18,7 +21,7 @@ const RecipeRelated: string = `
     }
 
     type Comments {
-        userId:ID!
+        userID:ID!
         text:String!
     }
 `;
@@ -82,6 +85,8 @@ const UserRelated: string = `
 const GraphQLSchema = buildSchema(`
 
     ${UserRelated}
+
+    ${RecipeRelated}
 
     type TokenObject {
         token:String!
