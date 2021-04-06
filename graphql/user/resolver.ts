@@ -406,6 +406,108 @@ const GraphQLResolver = {
       throw err;
     }
   },
+  getOwnRecipes:async function({},req:any){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+      const findUser = await User.findOne().populate("recipes").lean(true).exec()
+      if(!findUser){
+        throw new Error(xxxxxxx)
+      }
+      return findUser.recipes;
+    }catch(err){
+      throw err
+    }
+  },
+  getFavouriteRecipes:async function(){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+      const findUser = await User.findOne().populate("favouriteRecipes").lean(true).exec()
+      if(!findUser){
+        throw new Error(xxxxxxx)
+      }
+      return findUser.favouriteRecipes;
+    }catch(err){
+      throw err
+    }
+  },
+  getSavedRecipes: async function(){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+      const findUser = await User.findOne().populate("savedRecipes").lean(true).exec()
+      if(!findUser){
+        throw new Error(xxxxxxx)
+      }
+      return findUser.savedRecipes
+    }catch(err){
+      throw err
+    }
+  },
+  addUserToBuddies:async function(){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+     const findBuddy = await User.findOne({_id:userID}).exec()
+     if(!findBuddy){
+      throw new Error(errName.USER_NOT_FOUND)
+     }
+     req.user.favouriteUsers.push(findBuddy)
+     findBuddy.buddyRequest.push(req.user)
+     await findBuddy.save()
+     await req.user.save()
+     return `User {findBuddy.username} was added to your favourite user list`
+    }catch(err){
+      throw err}
+      
+  },
+  confirmBuddy:async function(){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+      const findRequest = User.findOne({_id:requestID}).exec();
+      if(!findRequest){
+        throw new Error(errName.USER_NOT_FOUND)
+      }
+      req.user.favouriteUsers.push(findRequest)
+      req.user.buddyRequest = req.user.buddyRequest.filter((id)=>{
+        return id.toString() !== findRequest._id.toString()
+      })
+      await req.user.save();
+    }catch(err){
+      throw err
+    }
+  },
+  getBuddies:async function(){
+    if(!req.user){
+      throw new Error(errName.AUTH_FAILED)
+    }
+    
+    try{
+      const findUser = await User.findOne()
+      .populate({
+       path:"favouriteUsers",
+        select:["_id","username","publicEmail","recipes"]
+      }).lean(true).exec()
+      if(!findUser){
+        throw new Error(errName.USER_NOT_FOUND)
+      }
+      return findUser.favouriteUsers
+    }catch(err){
+      throw err
+    }
+  },
 };
 
 export default GraphQLResolver;
