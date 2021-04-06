@@ -144,6 +144,9 @@ const GraphQLResolver = {
           throw new Error(errName.USER_OR_EMAIL_EXISTS);
         }
         findUser.emailAddress = emailAddress;
+        if (findUser.settings.showPublicEmail) {
+          findUser.publicEmail = emailAddress;
+        }
       }
       if (password) {
         findUser.meta.password = await hashedPassword(password);
