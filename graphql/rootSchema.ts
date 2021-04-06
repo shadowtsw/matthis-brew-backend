@@ -1,5 +1,33 @@
 import { buildSchema } from 'graphql';
 
+const Save: string = `
+    type SingleUser {
+        _id:ID!
+        username:String
+        publicEmail:String
+        followers:Int!
+        following:Int!
+        avatarURI:String
+    }
+
+    type FavouriteUser {
+        _id:ID!
+        username:String
+        publicEmail:String
+        avatarURI:String
+        recipes:[Recipe]!
+        followers:[UserPreview]!
+        following:[UserPreview]!
+    }
+
+    type UserPreview {
+        _id:ID!
+        username:String
+        publicEmail:String
+        avatarURI:String
+    }
+`;
+
 const RecipeRelated: string = `
     type Recipe {
         _id:ID!
@@ -77,20 +105,6 @@ const UserRelated: string = `
         emailAddress:String
     }
 
-    type FollowerDetail {
-        _id:ID!
-        username:String!
-        publicEmail:String
-        avatarURI:String
-    }
-
-    type UserFromList {
-        _id:ID!
-        username:String!
-        publicEmail:String
-        avatarURI:String
-    }
-
     input InputSettings {
         showPublicEmail:Boolean
         signature:String
@@ -98,30 +112,7 @@ const UserRelated: string = `
         darkmode:Boolean
     }
 
-    type FavouriteUser {
-        _id:ID!
-        username:String
-        publicEmail:String
-        recipes:[Recipe]!
-    }
 
-    type SingleUser {
-        _id:ID!
-        username:String
-        publicEmail:String
-        followers:[UserFollower]!
-        following:[UserFollowing]!
-    }
-
-    type UserFollower {
-        _id:ID!
-        username:String
-    }
-    
-    type UserFollowing {
-        _id:ID!
-        username:String
-    }
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -129,6 +120,8 @@ const GraphQLSchema = buildSchema(`
     ${UserRelated}
 
     ${RecipeRelated}
+
+    ${Save}
 
     type TokenObject {
         token:String!
@@ -142,16 +135,16 @@ const GraphQLSchema = buildSchema(`
         
         logout:String!
         
-        getAllFollowerDetails:[FollowerDetail]!
-        getAllFollowingDetails:[FollowerDetail]!
+        getAllFollowerDetails:[UserPreview]!
+        getAllFollowingDetails:[UserPreview]!
         
-        getUserList(filterByName:String count:Int):[UserFromList]!
+        getUserList(filterByName:String count:Int):[UserPreview]!
 
         getOwnRecipe:[Recipe]!
         getFavouriteRecipes:[Recipe]!
         getSavedRecipe:[Recipe]!
 
-        getBuddies:FavouriteUser!
+        getBuddies:[FavouriteUser]!
     }
     
     type RootMutation {

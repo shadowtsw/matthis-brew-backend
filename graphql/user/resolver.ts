@@ -46,7 +46,11 @@ const GraphQLResolver = {
       const singleUser = await User.findById(userID)
         .populate({
           path: 'follower following',
-          select: ['_id', 'username'],
+          select: ['_id', 'username', 'settings'],
+          populate: {
+            path: 'settings',
+            select: 'avatarURI',
+          },
         })
         .lean(true)
         .exec();
@@ -57,7 +61,22 @@ const GraphQLResolver = {
 
       const { _id, username, publicEmail, followers, following } = singleUser;
 
-      return { _id, username, publicEmail, followers, following };
+      const countFollowers = followers.reduce((acc, val): any => {
+        return (acc += 1);
+      }, 0);
+
+      const countFollowing = following.reduce((acc, val): any => {
+        return (acc += 1);
+      }, 0);
+
+      return {
+        _id,
+        username,
+        publicEmail,
+        followers: countFollowers,
+        following: countFollowing,
+        avatarURI: singleUser.settings.avatarURI,
+      };
     } catch (err) {
       throw err;
     }
@@ -309,7 +328,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'followers',
-        select: ['_id', 'username', 'publicEmail'],
+        select: ['_id', 'username', 'publicEmail', 'settings'],
       })
       .lean(true)
       .exec();
@@ -324,7 +343,13 @@ const GraphQLResolver = {
       throw new Error(errName.DEFAULT);
     }
 
-    return userWithDetails.followers;
+    const modifiedArray = userWithDetails.followers.map((entry: any) => {
+      const { username, publicEmail, _id } = entry;
+      const { avatarURI } = entry.settings;
+      return { username, publicEmail, _id, avatarURI };
+    });
+
+    return modifiedArray;
   },
   getAllFollowingDetails: async function ({}, req: any) {
     if (!req.user) {
@@ -333,7 +358,7 @@ const GraphQLResolver = {
     const userWithDetails = await User.findById(req.user._id)
       .populate({
         path: 'following',
-        select: ['_id', 'username', 'publicEmail'],
+        select: ['_id', 'username', 'publicEmail', 'settings'],
       })
       .lean(true)
       .exec();
@@ -348,7 +373,13 @@ const GraphQLResolver = {
       throw new Error(errName.DEFAULT);
     }
 
-    return userWithDetails.following;
+    const modifiedArray = userWithDetails.following.map((entry: any) => {
+      const { username, publicEmail, _id } = entry;
+      const { avatarURI } = entry.settings;
+      return { username, publicEmail, _id, avatarURI };
+    });
+
+    return modifiedArray;
   },
   getUserList: async function ({ filterByName, count }: any, req: any) {
     if (!req.user) {
@@ -529,16 +560,45 @@ const GraphQLResolver = {
     }
 
     try {
-      const findUser = await User.findOne({ _id: req.user._id })
+      const findUser: any = await User.findOne({ _id: req.user._id })
         .populate({
           path: 'favouriteUsers',
-          select: ['_id', 'username', 'publicEmail', 'recipes'],
+          select: [
+            '_id',
+            'username',
+            'publicEmail',
+            'followers',
+            'following',
+            'recipes',
+            'settings',
+          ],
+          populate: {
+            path: 'followers following',
+            select: ['_id', 'username', 'publicEmail', 'settings'],
+            populate: {
+              path: 'settings',
+              select: 'avatarURI',
+            },
+          },
         })
         .lean(true)
         .exec();
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
       }
+
+      findUser.favouriteUsers.forEach((user: any) => {
+        user.avatarURI = user.settings.avatarURI;
+        user.followers = user.followers.map((follower: any) => {
+          follower.avatarURI = follower.settings.avatarURI;
+          return follower;
+        });
+        user.following = user.following.map((follower: any) => {
+          follower.avatarURI = follower.settings.avatarURI;
+          return follower;
+        });
+      });
+
       return findUser.favouriteUsers;
     } catch (err) {
       throw err;
