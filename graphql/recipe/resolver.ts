@@ -72,6 +72,25 @@ const GraphQLResolver = {
       if (!findRecipe) {
         throw new Error(errName.RECIPE_NOT_FOUND);
       }
+      const alreadyDisLiked = findRecipe.likes.find((id) => {
+        return id.toString() === req.user._id.toString();
+      });
+      const alreadyLiked = findRecipe.likes.find((id) => {
+        return id.toString() === req.user._id.toString();
+      });
+
+      if (!alreadyDisLiked) {
+        findRecipe.disLikes.push(req.user);
+        findRecipe.totalDislikes += 1;
+      }
+      if (alreadyLiked) {
+        findRecipe.likes = findRecipe.likes.filter((id) => {
+          return id.toString() !== req.user._id.toString();
+        });
+        findRecipe.totalLikes -= 1;
+      }
+
+      await findRecipe.save();
     } catch (err) {}
   },
   addComment: async function () {},

@@ -150,6 +150,9 @@ const GraphQLSchema = buildSchema(`
         refreshToken(refreshToken:String!):TokenObject!
 
         addRecipe(addRecipeInput:RecipeInput):Recipe!
+
+        like:(recipeID:ID!):String!
+        disLike:(recipeID:ID!):String!
     }
 
     schema {
