@@ -1,7 +1,30 @@
 import { buildSchema } from 'graphql';
 
-//meta entfernt
-//        meta: UserMeta
+const RecipeRelated: string = `
+    type Recipe {
+        _id:ID!
+        userID:ID!
+        recipeName:String!
+        picture:String
+        ingredients:[IngredientList]!
+        totalLikes:Int
+        totalDisLikes:Int
+        comments:[Comments]!
+        createdAt:String
+        updatedAt:String
+    }
+
+    type IngredientList {
+        ingredient:String!
+        value:Int!
+        unit:String!
+    }
+
+    type Comments {
+        userID:ID!
+        text:String!
+    }
+`;
 
 const UserRelated: string = `
 
@@ -9,14 +32,19 @@ const UserRelated: string = `
         _id:ID!
         username:String!
         emailAddress:String!
-        dateCreated:Int
         followers:[ID]
         following:[ID]
+        createdAt:String
+        updatedAt:String
+        settings:UserSettings
+        publicEmail:String
     }
-    type UserMeta {
-        token:String
-        refreshToken:String
-        password:String
+
+    type UserSettings {
+        showPublicEmail:Boolean!
+        signature:String
+        description:String
+        darkmode:Boolean
     }
 
     input CreateUserInput {
@@ -30,14 +58,35 @@ const UserRelated: string = `
         password:String
         confirmPassword:String
         emailAddress:String
-        followers:[ID]
-        following:[ID]
+    }
+
+    type FollowerDetail {
+        _id:ID!
+        username:String!
+        publicEmail:String
+        avatarURI:String
+    }
+
+    type UserFromList {
+        _id:ID!
+        username:String!
+        publicEmail:String
+        avatarURI:String
+    }
+
+    input InputSettings {
+        showPublicEmail:Boolean
+        signature:String
+        description:String
+        darkmode:Boolean
     }
 `;
 
 const GraphQLSchema = buildSchema(`
 
     ${UserRelated}
+
+    ${RecipeRelated}
 
     type TokenObject {
         token:String!
@@ -46,12 +95,23 @@ const GraphQLSchema = buildSchema(`
 
     type RootQuery {
         getUserDetails:User!
+        
         logout:String!
+        
+        getAllFollowerDetails:[FollowerDetail]!
+        getAllFollowingDetails:[FollowerDetail]!
+        
+        getUserList(filterByName:String count:Int):[UserFromList]!
     }
     
     type RootMutation {
         createUser(createUserInput:CreateUserInput!):String!
         updateUser(updateUserInput:UpdateUserInput!):User!
+
+        setUserSettings(inputSettings:InputSettings):User!
+
+        followUser(followUserID:ID!):String!
+        unFollow(userID:ID!):String!
 
         login(username:String! password:String!):TokenObject!
         refreshToken(refreshToken:String!):TokenObject!

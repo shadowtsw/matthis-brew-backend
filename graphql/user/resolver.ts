@@ -10,6 +10,8 @@ import {
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
 import { errName } from '../../utils/error/error-handler';
 import validator from 'validator';
+import { messageTemplate } from '../../utils/verify/verifyMessage-template';
+import { createVerifyToken } from '../../utils/jwt/jwt';
 
 const GraphQLResolver = {
   getUserDetails: async function ({}, req: any) {
@@ -17,12 +19,21 @@ const GraphQLResolver = {
       if (!req.user) {
         throw new Error(errName.AUTH_FAILED);
       }
-      const findUser = await User.findById(req.user._id).exec();
+      const findUser = await User.findById(req.user._id).lean(true).exec();
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
       }
 
-      return { ...findUser._doc, dateCreated: Number(findUser.dateCreated) };
+      const { __v, ...relevantDoc } = findUser;
+
+      relevantDoc.createdAt = new Date(
+        Number(relevantDoc.createdAt)
+      ).toISOString();
+      relevantDoc.updatedAt = new Date(
+        Number(relevantDoc.updatedAt)
+      ).toISOString();
+
+      return relevantDoc;
     } catch (err) {
       throw err;
     }
@@ -46,10 +57,22 @@ const GraphQLResolver = {
     }
 
     try {
-      const findUser = await User.findOne({ username: username }).exec();
+      const findUser = await User.findOne({ username: username })
+        .lean(true)
+        .exec();
       if (findUser) {
         throw new Error(errName.USER_OR_EMAIL_EXISTS);
       }
+      const findUserByEmail = await User.findOne({
+        emailAddress: emailAddress,
+      })
+        .lean(true)
+        .exec();
+
+      if (findUserByEmail) {
+        throw new Error(errName.USER_OR_EMAIL_EXISTS);
+      }
+
       if (password !== confirmPassword) {
         throw new Error(errName.PASSWORD_MISMATCH);
       }
@@ -57,67 +80,74 @@ const GraphQLResolver = {
       const newUser = new User({
         username: username,
         emailAddress: emailAddress.toLowerCase(),
-        dateCreated: new Date().getMilliseconds().toString(),
+        dateCreated: new Date().getTime().toString(),
+        settings: {
+          showPublicEmail: false,
+        },
+        publicEmail: null,
         meta: {
           password: secretPassword,
         },
       });
 
       await newUser.save();
-      return `User with name:${username} was successfully created !`;
+
+      const emailToken = await createVerifyToken({ accountID: newUser._id });
+
+      const message = messageTemplate(
+        newUser.username,
+        newUser._id,
+        emailToken
+      );
+
+      console.log(message);
+
+      //prettier ignore
+      return message;
     } catch (err) {
       throw err;
     }
   },
   updateUser: async function ({ updateUserInput }: any, req: any) {
-    const { confirmPassword, ...dataWithoutConfirm } = updateUserInput;
+    const { confirmPassword, password, emailAddress } = updateUserInput;
 
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
 
-    if (
-      updateUserInput.emailAddress &&
-      !validator.isEmail(updateUserInput.emailAddress)
-    ) {
+    if (emailAddress && !validator.isEmail(emailAddress)) {
       throw new Error(errName.INVALID_EMAIL);
     }
-    if (
-      updateUserInput.password &&
-      !validator.isLength(updateUserInput.password, { min: 5 })
-    ) {
+    if (password && !validator.isLength(password, { min: 5 })) {
       throw new Error(errName.INVALID_PASS);
     }
 
-    if (updateUserInput.password && !confirmPassword) {
+    if (password && !confirmPassword) {
       throw new Error(errName.PASSWORD_MISMATCH);
     }
-    if (
-      updateUserInput.password &&
-      confirmPassword &&
-      updateUserInput.password !== confirmPassword
-    ) {
+    if (password && confirmPassword && password !== confirmPassword) {
       throw new Error(errName.PASSWORD_MISMATCH);
     }
 
     try {
-      const findUser = await User.findById(req.user._id);
+      const findUser = await User.findById(req.user._id).exec();
 
       if (!findUser) {
         throw new Error(errName.USER_NOT_FOUND);
       }
 
-      const { password, ...remainingProps } = dataWithoutConfirm;
-
+      if (emailAddress) {
+        const checkEmail = await User.findOne({ emailAddress: emailAddress })
+          .lean(true)
+          .exec();
+        if (checkEmail) {
+          throw new Error(errName.USER_OR_EMAIL_EXISTS);
+        }
+        findUser.emailAddress = emailAddress;
+      }
       if (password) {
-        findUser.meta.password = await hashedPassword(updateUserInput.password);
+        findUser.meta.password = await hashedPassword(password);
       }
-
-      if (remainingProps) {
-        let updatedProps = { ...findUser._doc, ...remainingProps };
-        findUser._doc = updatedProps;
-      }
-
       return await findUser.save();
     } catch (err) {
       throw err;
@@ -135,6 +165,9 @@ const GraphQLResolver = {
       const comparePass = await comparePassword(password, user.meta.password);
       if (!comparePass) {
         throw new Error(errName.PASSWORD_MISMATCH);
+      }
+      if (!user.meta.isVerified) {
+        throw new Error(errName.MISSING_VALIDATION);
       }
       const authObject = {
         token: createToken({
@@ -160,7 +193,9 @@ const GraphQLResolver = {
       const newAuthObject = useRefreshToken(refreshToken);
       const user = await User.findOne({
         username: newAuthObject.username,
-      }).exec();
+      })
+        .lean(true)
+        .exec();
       if (!user) {
         throw new Error(errName.TOKEN_EXPIRED);
       }
@@ -172,8 +207,8 @@ const GraphQLResolver = {
         emailAddress: user.emailAddress,
         isAuth: true,
       });
-      user.meta.refreshToken = newRefreshToken;
-      await user.save();
+      req.user.meta.refreshToken = newRefreshToken;
+      await req.user.save();
       return {
         token: newAuthObject.token,
         refreshToken: newRefreshToken,
@@ -187,13 +222,183 @@ const GraphQLResolver = {
       throw new Error(errName.LOGOUT_ERROR);
     }
     try {
-      const user = await User.findById(req.user._id).exec();
+      const user = await User.findById(req.user._id).lean(true).exec();
       if (!user) {
         throw new Error(errName.USER_NOT_FOUND);
       }
-      user.meta.refreshToken = '';
-      await user.save();
+      req.user.meta.refreshToken = '';
+      await req.user.save();
       return 'Logout successful !';
+    } catch (err) {
+      throw err;
+    }
+  },
+  followUser: async function ({ followUserID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    const targetUser = await User.findById(followUserID).exec();
+
+    if (!targetUser) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    req.user.following.push(targetUser);
+    targetUser.followers.push(req.user);
+
+    await req.user.save();
+    await targetUser.save();
+
+    return `Success, you are now following ${targetUser.username} !`;
+  },
+  unFollow: async function ({ userID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const targetUser = await User.findById(userID).exec();
+
+    if (!targetUser) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    req.user.following = req.user.following.filter((id: any) => {
+      return id.toString() !== userID;
+    });
+
+    targetUser.followers = targetUser.followers.filter((id: any) => {
+      return id.toString() !== req.user.id;
+    });
+
+    await req.user.save();
+    await targetUser.save();
+
+    return `Let him go, you aren´t further following ${targetUser.username}`;
+  },
+  getAllFollowerDetails: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const userWithDetails = await User.findById(req.user._id)
+      .populate({
+        path: 'followers',
+        select: ['username', 'publicEmail'],
+      })
+      .lean(true)
+      .exec();
+
+    if (!userWithDetails) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    const { followers } = userWithDetails;
+
+    if (!followers) {
+      throw new Error(errName.DEFAULT);
+    }
+
+    return userWithDetails.followers;
+  },
+  getAllFollowingDetails: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const userWithDetails = await User.findById(req.user._id)
+      .populate({
+        path: 'following',
+        select: ['username', 'publicEmail'],
+      })
+      .lean(true)
+      .exec();
+
+    if (!userWithDetails) {
+      throw new Error(errName.USER_NOT_FOUND);
+    }
+
+    const { following } = userWithDetails;
+
+    if (!following) {
+      throw new Error(errName.DEFAULT);
+    }
+
+    return userWithDetails.following;
+  },
+  getUserList: async function ({ filterByName, count }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      if (!filterByName) {
+        const query = User.find();
+        query.select('_id username puplicEmail settings');
+        query.getFilter();
+        if (count) {
+          query.limit(count);
+          query.getFilter();
+        }
+        const showResult = await query.lean(true).exec();
+
+        const modifiedArray = showResult.map((entry) => {
+          const { username, publicEmail, _id } = entry;
+          const { avatarURI } = entry.settings;
+          return { username, publicEmail, _id, avatarURI };
+        });
+
+        return modifiedArray;
+        // username & puplicMail & avatar
+      }
+
+      if (filterByName) {
+        const regExp = new RegExp(filterByName);
+        const query = User.find({ username: regExp }).select(
+          '_id username puplicEmail settings'
+        );
+        query.getFilter();
+        if (count) {
+          query.limit(count);
+          query.getFilter();
+        }
+        const showResult = await query.lean(true).exec();
+        const modifiedArray = showResult.map((entry) => {
+          const { username, publicEmail, _id } = entry;
+          const { avatarURI } = entry.settings;
+          return { username, publicEmail, _id, avatarURI };
+        });
+
+        return modifiedArray;
+      }
+    } catch (err) {
+      throw err;
+    }
+  },
+  setUserSettings: async function ({ inputSettings }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    const { showPublicEmail, signature, description, darkmode } = inputSettings;
+
+    try {
+      if (darkmode !== undefined && darkmode !== null) {
+        req.user.darkmode = darkmode;
+      }
+
+      if (signature) {
+        req.user.settings.signature = signature;
+      }
+
+      if (description) {
+        req.user.settings.description = description;
+      }
+
+      if (showPublicEmail !== undefined && showPublicEmail !== null) {
+        if (showPublicEmail) {
+          req.user.settings.showPublicEmail = showPublicEmail;
+          req.user.publicEmail = req.user.emailAddress;
+        } else if (showPublicEmail === false) {
+          req.user.publicEmail = null;
+        }
+      }
+      return await req.user.save();
     } catch (err) {
       throw err;
     }
