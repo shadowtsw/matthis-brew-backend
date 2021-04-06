@@ -406,106 +406,118 @@ const GraphQLResolver = {
       throw err;
     }
   },
-  getOwnRecipes:async function({},req:any){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
+  getOwnRecipes: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
     }
-    
-    try{
-      const findUser = await User.findOne().populate("recipes").lean(true).exec()
-      if(!findUser){
-        throw new Error(xxxxxxx)
+
+    try {
+      const findUser = await User.findOne({ _id: req.user._id })
+        .populate('recipes')
+        .lean(true)
+        .exec();
+      if (!findUser) {
+        throw new Error(errName.USER_NOT_FOUND);
       }
       return findUser.recipes;
-    }catch(err){
-      throw err
+    } catch (err) {
+      throw err;
     }
   },
-  getFavouriteRecipes:async function(){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
+  getFavouriteRecipes: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
     }
-    
-    try{
-      const findUser = await User.findOne().populate("favouriteRecipes").lean(true).exec()
-      if(!findUser){
-        throw new Error(xxxxxxx)
+
+    try {
+      const findUser = await User.findOne({ _id: req.user._id })
+        .populate('favouriteRecipes')
+        .lean(true)
+        .exec();
+      if (!findUser) {
+        throw new Error(errName.USER_NOT_FOUND);
       }
       return findUser.favouriteRecipes;
-    }catch(err){
-      throw err
+    } catch (err) {
+      throw err;
     }
   },
-  getSavedRecipes: async function(){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
+  getSavedRecipes: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
     }
-    
-    try{
-      const findUser = await User.findOne().populate("savedRecipes").lean(true).exec()
-      if(!findUser){
-        throw new Error(xxxxxxx)
+
+    try {
+      const findUser = await User.findOne({ _id: req.user._id })
+        .populate('savedRecipes')
+        .lean(true)
+        .exec();
+      if (!findUser) {
+        throw new Error(errName.USER_NOT_FOUND);
       }
-      return findUser.savedRecipes
-    }catch(err){
-      throw err
+      return findUser.savedRecipes;
+    } catch (err) {
+      throw err;
     }
   },
-  addUserToBuddies:async function(){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
+  addUserToFavourites: async function ({ favouriteID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
     }
-    
-    try{
-     const findBuddy = await User.findOne({_id:userID}).exec()
-     if(!findBuddy){
-      throw new Error(errName.USER_NOT_FOUND)
-     }
-     req.user.favouriteUsers.push(findBuddy)
-     findBuddy.buddyRequest.push(req.user)
-     await findBuddy.save()
-     await req.user.save()
-     return `User {findBuddy.username} was added to your favourite user list`
-    }catch(err){
-      throw err}
-      
-  },
-  confirmBuddy:async function(){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
-    }
-    
-    try{
-      const findRequest = User.findOne({_id:requestID}).exec();
-      if(!findRequest){
-        throw new Error(errName.USER_NOT_FOUND)
+
+    try {
+      const findBuddy = await User.findOne({ _id: favouriteID }).exec();
+      if (!findBuddy) {
+        throw new Error(errName.USER_NOT_FOUND);
       }
-      req.user.favouriteUsers.push(findRequest)
-      req.user.buddyRequest = req.user.buddyRequest.filter((id)=>{
-        return id.toString() !== findRequest._id.toString()
-      })
+      req.user.favouriteUsers.push(findBuddy);
+      findBuddy.buddyRequest.push(req.user);
+      await findBuddy.save();
       await req.user.save();
-    }catch(err){
-      throw err
+      return `User ${findBuddy.username} was added to your favourite user list. The user will will be informed.`;
+    } catch (err) {
+      throw err;
     }
   },
-  getBuddies:async function(){
-    if(!req.user){
-      throw new Error(errName.AUTH_FAILED)
+  confirmBuddy: async function ({ requestID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
     }
-    
-    try{
-      const findUser = await User.findOne()
-      .populate({
-       path:"favouriteUsers",
-        select:["_id","username","publicEmail","recipes"]
-      }).lean(true).exec()
-      if(!findUser){
-        throw new Error(errName.USER_NOT_FOUND)
+
+    try {
+      const findRequest = await User.findOne({ _id: requestID }).exec();
+      if (!findRequest) {
+        throw new Error(errName.USER_NOT_FOUND);
       }
-      return findUser.favouriteUsers
-    }catch(err){
-      throw err
+      req.user.favouriteUsers.push(findRequest);
+      req.user.buddyRequest = req.user.buddyRequest.filter((id: any) => {
+        return id.toString() !== findRequest._id.toString();
+      });
+      await req.user.save();
+      return `User ${findRequest.username} has been added to your favourite user list.`;
+    } catch (err) {
+      throw err;
+    }
+  },
+  getBuddies: async function ({}, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    try {
+      const findUser = await User.findOne({ _id: req.user._id })
+        .populate({
+          path: 'favouriteUsers',
+          select: ['_id', 'username', 'publicEmail', 'recipes'],
+        })
+        .lean(true)
+        .exec();
+      if (!findUser) {
+        throw new Error(errName.USER_NOT_FOUND);
+      }
+      return findUser.favouriteUsers;
+    } catch (err) {
+      throw err;
     }
   },
 };

@@ -33,6 +33,18 @@ const recipeSchema = new Schema(
         },
       },
     ],
+    descriptions: [
+      {
+        topic: {
+          type: String,
+          required: false,
+        },
+        text: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
     likes: [
       {
         type: Schema.Types.ObjectId,
@@ -77,11 +89,13 @@ interface RecipeProps extends Document {
   userID: Types.ObjectId;
   recipeName: string;
   picture: string;
-  likes: Types.ObjectId;
+  likes: Array<Types.ObjectId>;
   totalLikes: number;
-  disLikes: Types.ObjectId;
+  disLikes: Array<Types.ObjectId>;
   totalDislikes: number;
   comments: [{ userId: Types.ObjectId; text: string }];
+  ingredients: [{ ingredient: string; value: number; unit: string }];
+  descriptions: [{ topic: string; text: string }];
   _doc: Types.EmbeddedDocument;
   __v: number;
   createdAt: string;

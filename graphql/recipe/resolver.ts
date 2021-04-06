@@ -4,37 +4,78 @@ import { errName } from '../../utils/error/error-handler';
 import validator from 'validator';
 
 const GraphQLResolver = {
-  addRecipe: async function({},req:any){
-    if(!req.user){
+  addRecipe: async function ({ addRecipeInput }: any, req: any) {
+    if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
-    
-    const {recipeName} = xxxx
-    
-    try{
-      
+
+    const { recipeName } = addRecipeInput;
+    const [...ingredients] = addRecipeInput.ingredients;
+    const [...descriptions] = addRecipeInput.descriptions;
+
+    try {
       const newRecipe = new Recipe({
-        userID:req.user,
+        userID: req.user,
         recipeName: recipeName,
-        ingredients: xxx,
-      })
-      
+      });
+
+      if (ingredients) {
+        newRecipe.ingredients = ingredients;
+      }
+      if (descriptions) {
+        newRecipe.descriptions = descriptions;
+      }
+
       return await newRecipe.save();
-     
-    }catch (err){
-      throw err
+    } catch (err) {
+      throw err;
     }
   },
-  updateRecipe:async function(){
+  updateRecipe: async function () {},
+  like: async function ({ recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    try {
+      const findRecipe = await Recipe.findById(recipeID).exec();
+      if (!findRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+      const alreadyLiked = findRecipe.likes.find((id) => {
+        return id.toString() === req.user._id.toString();
+      });
+      const alreadyDisLiked = findRecipe.likes.find((id) => {
+        return id.toString() === req.user._id.toString();
+      });
+
+      if (!alreadyLiked) {
+        findRecipe.likes.push(req.user);
+        findRecipe.totalLikes += 1;
+      }
+      if (alreadyDisLiked) {
+        findRecipe.disLikes = findRecipe.disLikes.filter((id) => {
+          return id.toString() !== req.user._id.toString();
+        });
+        findRecipe.totalDislikes -= 1;
+      }
+
+      await findRecipe.save();
+    } catch (err) {}
   },
-  like:async function(){
+  disLike: async function ({ recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      const findRecipe = await Recipe.findById(recipeID).exec();
+      if (!findRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+    } catch (err) {}
   },
-  disLike:async function(){
-  },
-  addComment:async function(){
-  },
-  removeComment:async function(){
-  },
+  addComment: async function () {},
+  removeComment: async function () {},
 };
 
 export default GraphQLResolver;

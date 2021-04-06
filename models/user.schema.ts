@@ -111,11 +111,11 @@ const userSchema = new Schema(
         ref: 'User',
       },
     ],
-    buddyRequest:[
+    buddyRequest: [
       {
         type: Schema.Types.ObjectId,
-        ref:"User"
-      }
+        ref: 'User',
+      },
     ],
   },
   { timestamps: true }
@@ -146,6 +146,7 @@ interface UserProps extends Document {
   followers: Array<Types.ObjectId>;
   following: Array<Types.ObjectId>;
   favouriteUsers: Array<Types.ObjectId>;
+  buddyRequest: Array<Types.ObjectId>;
   _doc: Types.EmbeddedDocument;
   __v: number;
   createdAt: string;

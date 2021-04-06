@@ -19,6 +19,7 @@ export const errName = {
   INVALID_EMAIL: 'INVALID_EMAIL',
   INVALID_PASS: 'INVALID_PASS',
   MISSING_VALIDATION: 'MISSING_VALIDATION',
+  RECIPE_NOT_FOUND: 'RECIPE_NOT_FOUND',
 };
 
 const errorType: ErrorTypes = {
@@ -65,6 +66,10 @@ const errorType: ErrorTypes = {
   },
   MISSING_VALIDATION: {
     message: 'Please validate your email first !',
+    statusCode: 500,
+  },
+  RECIPE_NOT_FOUND: {
+    message: 'Recipe not found',
     statusCode: 500,
   },
 };

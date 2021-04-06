@@ -6,7 +6,7 @@ const RecipeRelated: string = `
         userID:ID!
         recipeName:String!
         picture:String
-        ingredients:[IngredientList]!
+        ingredients:[Ingredient]!
         totalLikes:Int
         totalDisLikes:Int
         comments:[Comments]!
@@ -14,7 +14,7 @@ const RecipeRelated: string = `
         updatedAt:String
     }
 
-    type IngredientList {
+    type Ingredient {
         ingredient:String!
         value:Int!
         unit:String!
@@ -23,6 +23,23 @@ const RecipeRelated: string = `
     type Comments {
         userID:ID!
         text:String!
+    }
+
+    input RecipeInput{
+        recipeName:String!
+        ingredients:[IngredientInput]!
+        descriptions:[DescriptionInput]
+    }
+
+    input IngredientInput {
+        ingredient:String
+        value:Int
+        unit:String
+    }
+
+    input DescriptionInput{
+        topic:String
+        text:String
     }
 `;
 
@@ -80,6 +97,13 @@ const UserRelated: string = `
         description:String
         darkmode:Boolean
     }
+
+    type FavouriteUser {
+        _id:ID!
+        username:String
+        publicEmail:String
+        recipes:[Recipe]!
+    }
 `;
 
 const GraphQLSchema = buildSchema(`
@@ -102,6 +126,12 @@ const GraphQLSchema = buildSchema(`
         getAllFollowingDetails:[FollowerDetail]!
         
         getUserList(filterByName:String count:Int):[UserFromList]!
+
+        getOwnRecipe:[Recipe]!
+        getFavouriteRecipes:[Recipe]!
+        getSavedRecipe:[Recipe]!
+
+        getBuddies:FavouriteUser!
     }
     
     type RootMutation {
@@ -113,8 +143,13 @@ const GraphQLSchema = buildSchema(`
         followUser(followUserID:ID!):String!
         unFollow(userID:ID!):String!
 
+        addUserToFavourites(favouriteID:ID!):String!
+        confirmBuddy(requestID:ID!):String!
+
         login(username:String! password:String!):TokenObject!
         refreshToken(refreshToken:String!):TokenObject!
+
+        addRecipe(addRecipeInput:RecipeInput):Recipe!
     }
 
     schema {
