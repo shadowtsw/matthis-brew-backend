@@ -111,6 +111,12 @@ const userSchema = new Schema(
         ref: 'User',
       },
     ],
+    buddyRequest:[
+      {
+        type: Schema.Types.ObjectId,
+        ref:"User"
+      }
+    ],
   },
   { timestamps: true }
 );
