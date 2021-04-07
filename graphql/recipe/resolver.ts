@@ -2,6 +2,7 @@ import Recipe from '../../models/recipe.schema';
 
 import { errName } from '../../utils/error/error-handler';
 import validator from 'validator';
+import mongoose from 'mongoose';
 
 const GraphQLResolver = {
   addRecipe: async function ({ addRecipeInput }: any, req: any) {
@@ -136,8 +137,58 @@ const GraphQLResolver = {
       return `Sorry to hear, but thanks for your vote !`;
     } catch (err) {}
   },
-  addComment: async function () {},
-  removeComment: async function () {},
+  addComment: async function ({ comment, recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    try {
+      const findRecipe = await Recipe.findById(recipeID).exec();
+      if (!findRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+      findRecipe.comments.push({
+        _id: mongoose.Types.ObjectId(),
+        userID: req.user,
+        text: comment,
+      });
+      await findRecipe.save();
+      return `Your comment has been stored in ${findRecipe.recipeName}`;
+    } catch (err) {
+      throw err;
+    }
+  },
+  removeComment: async function ({ commentID, recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+
+    try {
+      const findRecipe = await Recipe.findById(recipeID).exec();
+      if (!findRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+      const relatedComment = findRecipe.comments.find((comment: any) => {
+        return comment._id.toString() === commentID;
+      });
+      if (!relatedComment) {
+        throw new Error(errName.COMMENT_NOT_FOUND);
+      }
+      if (relatedComment.userID.toString() !== req.user._id.toString()) {
+        throw new Error(errName.OWNER_FAIL);
+      }
+      const newCommentArray = findRecipe.comments.filter((comment) => {
+        return comment._id.toString() !== commentID;
+      });
+
+      findRecipe.comments = newCommentArray;
+
+      await findRecipe.save();
+      return `Your comment has been removed from ${findRecipe.recipeName}`;
+    } catch (err) {
+      throw err;
+    }
+  },
 };
 
 export default GraphQLResolver;

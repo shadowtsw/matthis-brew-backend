@@ -21,6 +21,8 @@ export const errName = {
   MISSING_VALIDATION: 'MISSING_VALIDATION',
   RECIPE_NOT_FOUND: 'RECIPE_NOT_FOUND',
   TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
+  OWNER_FAIL: 'OWNER_FAIL',
+  COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
 };
 
 const errorType: ErrorTypes = {
@@ -75,6 +77,14 @@ const errorType: ErrorTypes = {
   },
   TOO_MANY_ENTRIES: {
     message: 'You have acceeded the maximum of allowed stored values',
+    statusCode: 500,
+  },
+  OWNER_FAIL: {
+    message: 'You are not the owner of this recipe/comment/object',
+    statusCode: 500,
+  },
+  COMMENT_NOT_FOUND: {
+    message: 'The related comment doesn`t exist',
     statusCode: 500,
   },
 };

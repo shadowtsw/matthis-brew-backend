@@ -96,10 +96,17 @@ interface RecipeProps extends Document {
   totalLikes: number;
   disLikes: Array<Types.ObjectId>;
   totalDislikes: number;
-  comments: [{ userId: Types.ObjectId; text: string }];
-  ingredients: [
-    { ingredient: string; value: number; unit: string; comment: string }
-  ];
+  comments: Array<{
+    _id: Types.ObjectId;
+    userID: Types.ObjectId;
+    text: string;
+  }>;
+  ingredients: Array<{
+    ingredient: string;
+    value: number;
+    unit: string;
+    comment: string;
+  }>;
   descriptions: [{ topic: string; text: string }];
   _doc: Types.EmbeddedDocument;
   __v: number;

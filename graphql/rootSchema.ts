@@ -51,6 +51,7 @@ const RecipeRelated: string = `
     }
 
     type UserComments {
+        _id:ID!
         userID:ID!
         text:String!
     }
@@ -168,6 +169,9 @@ const GraphQLSchema = buildSchema(`
         addRecipe(addRecipeInput:RecipeInput):Recipe!
         saveRecipeInFavourites(recipeID:ID!):String!
         saveRecipeToUser(recipeID:ID!):String!
+
+        addComment(comment:String! recipeID:ID!):String!
+        removeComment(commentID:ID! recipeID:ID!):String!
 
         like(recipeID:ID!):String!
         disLike(recipeID:ID!):String!
