@@ -20,6 +20,7 @@ export const errName = {
   INVALID_PASS: 'INVALID_PASS',
   MISSING_VALIDATION: 'MISSING_VALIDATION',
   RECIPE_NOT_FOUND: 'RECIPE_NOT_FOUND',
+  TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
 };
 
 const errorType: ErrorTypes = {
@@ -70,6 +71,10 @@ const errorType: ErrorTypes = {
   },
   RECIPE_NOT_FOUND: {
     message: 'Recipe not found',
+    statusCode: 500,
+  },
+  TOO_MANY_ENTRIES: {
+    message: 'You have acceeded the maximum of allowed stored values',
     statusCode: 500,
   },
 };

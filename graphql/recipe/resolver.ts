@@ -17,6 +17,8 @@ const GraphQLResolver = {
       const newRecipe = new Recipe({
         userID: req.user,
         recipeName: recipeName,
+        likes: [],
+        disLikes: [],
       });
 
       if (ingredients) {
@@ -26,7 +28,45 @@ const GraphQLResolver = {
         newRecipe.descriptions = descriptions;
       }
 
+      req.user.recipes.push(newRecipe);
+      await req.user.save();
+
       return await newRecipe.save();
+    } catch (err) {
+      throw err;
+    }
+  },
+  saveRecipeInFavourites: async function ({ recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      const favouriteRecipe = await Recipe.findById(recipeID).exec();
+      if (!favouriteRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+      if (req.user.favouriteRecipes.length === 10) {
+        throw new Error(errName.TOO_MANY_ENTRIES);
+      }
+      req.user.favouriteRecipes.push(favouriteRecipe);
+      await req.user.save();
+      return `Successfully saved ${favouriteRecipe.recipeName} to your favourites !`;
+    } catch (err) {
+      throw err;
+    }
+  },
+  saveRecipeToUser: async function ({ recipeID }: any, req: any) {
+    if (!req.user) {
+      throw new Error(errName.AUTH_FAILED);
+    }
+    try {
+      const findRecipe = await Recipe.findById(recipeID).exec();
+      if (!findRecipe) {
+        throw new Error(errName.RECIPE_NOT_FOUND);
+      }
+      req.user.savedRecipes.push(findRecipe);
+      await req.user.save();
+      return `Successfully saved ${findRecipe.recipeName}`;
     } catch (err) {
       throw err;
     }
@@ -45,7 +85,7 @@ const GraphQLResolver = {
       const alreadyLiked = findRecipe.likes.find((id) => {
         return id.toString() === req.user._id.toString();
       });
-      const alreadyDisLiked = findRecipe.likes.find((id) => {
+      const alreadyDisLiked = findRecipe.disLikes.find((id) => {
         return id.toString() === req.user._id.toString();
       });
 
@@ -54,6 +94,7 @@ const GraphQLResolver = {
         findRecipe.totalLikes += 1;
       }
       if (alreadyDisLiked) {
+        console.log(alreadyDisLiked);
         findRecipe.disLikes = findRecipe.disLikes.filter((id) => {
           return id.toString() !== req.user._id.toString();
         });
@@ -61,6 +102,7 @@ const GraphQLResolver = {
       }
 
       await findRecipe.save();
+      return `Thanks for your vote !`;
     } catch (err) {}
   },
   disLike: async function ({ recipeID }: any, req: any) {
@@ -72,7 +114,7 @@ const GraphQLResolver = {
       if (!findRecipe) {
         throw new Error(errName.RECIPE_NOT_FOUND);
       }
-      const alreadyDisLiked = findRecipe.likes.find((id) => {
+      const alreadyDisLiked = findRecipe.disLikes.find((id) => {
         return id.toString() === req.user._id.toString();
       });
       const alreadyLiked = findRecipe.likes.find((id) => {
@@ -91,6 +133,7 @@ const GraphQLResolver = {
       }
 
       await findRecipe.save();
+      return `Sorry to hear, but thanks for your vote !`;
     } catch (err) {}
   },
   addComment: async function () {},

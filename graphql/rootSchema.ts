@@ -36,19 +36,21 @@ const RecipeRelated: string = `
         picture:String
         ingredients:[Ingredient]!
         totalLikes:Int
-        totalDisLikes:Int
-        comments:[Comments]!
+        totalDislikes:Int
+        comments:[UserComments]!
         createdAt:String
         updatedAt:String
     }
 
     type Ingredient {
+        _id:ID
         ingredient:String!
         value:Int!
-        unit:String!
+        unit:String
+        comment:String
     }
 
-    type Comments {
+    type UserComments {
         userID:ID!
         text:String!
     }
@@ -63,6 +65,7 @@ const RecipeRelated: string = `
         ingredient:String
         value:Int
         unit:String
+        comment:String
     }
 
     input DescriptionInput{
@@ -140,7 +143,7 @@ const GraphQLSchema = buildSchema(`
         
         getUserList(filterByName:String count:Int):[UserPreview]!
 
-        getOwnRecipe:[Recipe]!
+        getOwnRecipes:[Recipe]!
         getFavouriteRecipes:[Recipe]!
         getSavedRecipe:[Recipe]!
 
@@ -163,6 +166,8 @@ const GraphQLSchema = buildSchema(`
         refreshToken(refreshToken:String!):TokenObject!
 
         addRecipe(addRecipeInput:RecipeInput):Recipe!
+        saveRecipeInFavourites(recipeID:ID!):String!
+        saveRecipeToUser(recipeID:ID!):String!
 
         like(recipeID:ID!):String!
         disLike(recipeID:ID!):String!
