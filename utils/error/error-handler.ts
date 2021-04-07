@@ -28,7 +28,7 @@ export const errName = {
 const errorType: ErrorTypes = {
   AUTH_FAILED: {
     message: 'Authentication failed !',
-    statusCode: 404,
+    statusCode: 401,
   },
   DEFAULT: {
     message: 'An Error occurred !',
@@ -36,7 +36,7 @@ const errorType: ErrorTypes = {
   },
   USER_NOT_FOUND: {
     message: 'User not found !',
-    statusCode: 400,
+    statusCode: 404,
   },
   ALREADY_LOGGED_IN: {
     message: 'Already logged in !',
@@ -52,40 +52,40 @@ const errorType: ErrorTypes = {
   },
   TOKEN_EXPIRED: {
     message: 'No valid token or token expired',
-    statusCode: 404,
+    statusCode: 401,
   },
   LOGOUT_ERROR: {
     message:
       'Only Chuck Norries is able to logout without beeing logged in before',
-    statusCode: 404,
+    statusCode: 400,
   },
   INVALID_EMAIL: {
     message: 'Invalid email, please enter valid email address',
-    statusCode: 500,
+    statusCode: 400,
   },
   INVALID_PASS: {
     message: 'Passwort is missing or must be at least 6 characters long',
-    statusCode: 500,
+    statusCode: 400,
   },
   MISSING_VALIDATION: {
     message: 'Please validate your email first !',
-    statusCode: 500,
+    statusCode: 403,
   },
   RECIPE_NOT_FOUND: {
     message: 'Recipe not found',
-    statusCode: 500,
+    statusCode: 404,
   },
   TOO_MANY_ENTRIES: {
     message: 'You have acceeded the maximum of allowed stored values',
-    statusCode: 500,
+    statusCode: 403,
   },
   OWNER_FAIL: {
     message: 'You are not the owner of this recipe/comment/object',
-    statusCode: 500,
+    statusCode: 403,
   },
   COMMENT_NOT_FOUND: {
     message: 'The related comment doesn`t exist',
-    statusCode: 500,
+    statusCode: 404,
   },
 };
 
