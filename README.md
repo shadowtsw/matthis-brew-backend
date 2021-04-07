@@ -1,13 +1,27 @@
 # matthis-brew-backend
 
-## major
+# major
 
+### 07.04.2021
+- some response models are renamed
+-------------------------------------------------------------------
 ### 06.04.2021
 - email address from external user is now called publicEmail
 - publicEmail can be set in settings->showPublicEmail
 
-## minor
+# minor
 
+### 07.04.2021
+- advanced user management
+  - add user to favourites/buddies
+  - shows that user has added you to his friends
+  - show more details on savedRecipes, favouriteRecipes, ownRecipes
+
+- recipe managemnt implemented
+  - add recipe
+  - save recipe to favourites, savedRecipes
+  - like,dislike and comment recipes, remove own comment from recipe
+-------------------------------------------------------------------
 ### 06.04.2021
 - adds recipe model
 - adds machine model
