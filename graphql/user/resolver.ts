@@ -239,9 +239,8 @@ const GraphQLResolver = {
       const newAuthObject = useRefreshToken(refreshToken);
       const user = await User.findOne({
         username: newAuthObject.username,
-      })
-        .lean(true)
-        .exec();
+      }).exec();
+
       if (!user) {
         throw new Error(errName.TOKEN_EXPIRED);
       }
@@ -253,8 +252,9 @@ const GraphQLResolver = {
         emailAddress: user.emailAddress,
         isAuth: true,
       });
-      req.user.meta.refreshToken = newRefreshToken;
-      await req.user.save();
+      user.meta.refreshToken = newRefreshToken;
+      await user.save();
+
       return {
         token: newAuthObject.token,
         refreshToken: newRefreshToken,
