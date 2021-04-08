@@ -48,10 +48,18 @@ const useRefreshToken = (
 ): { username: string; token: string } => {
   const authObject = {} as { username: string; token: string };
   jwt.verify(refreshToken, refreshKey, (err, data: any) => {
-    if (err) throw new Error('Token is not valid');
+    if (err) {
+      console.log(err);
+      throw new Error('Token is not valid');
+    }
     if (data) {
       authObject.username = data.username;
-      authObject.token = createToken(data);
+      console.log(data);
+      authObject.token = createToken({
+        username: data.username,
+        emailAddress: data.emailAddress,
+        isAuth: data.isAuth,
+      });
     }
   });
   return authObject;
