@@ -22,7 +22,7 @@ export const authMiddleWare: ExpressMiddleWare = async (req, res, next) => {
 
   //check for user data
   if (!userData) {
-    console.error('Token authentication failed');
+    // console.error('Token authentication failed');
     return next(new Error(errName.AUTH_FAILED));
   }
 

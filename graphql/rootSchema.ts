@@ -94,6 +94,8 @@ const UserRelated: string = `
         signature:String
         description:String
         darkmode:Boolean
+        avatarURI:String
+        theme:String
     }
 
     input CreateUserInput {
@@ -107,6 +109,7 @@ const UserRelated: string = `
         password:String
         confirmPassword:String
         emailAddress:String
+        
     }
 
     input InputSettings {
@@ -114,6 +117,8 @@ const UserRelated: string = `
         signature:String
         description:String
         darkmode:Boolean
+        avatarURI:String
+        theme:String
     }
 
 

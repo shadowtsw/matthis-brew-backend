@@ -194,6 +194,7 @@ const GraphQLResolver = {
       if (password) {
         findUser.meta.password = await hashedPassword(password);
       }
+
       return await findUser.save();
     } catch (err) {
       throw err;
@@ -433,7 +434,14 @@ const GraphQLResolver = {
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
-    const { showPublicEmail, signature, description, darkmode } = inputSettings;
+    const {
+      showPublicEmail,
+      signature,
+      description,
+      darkmode,
+      avatarURI,
+      theme,
+    } = inputSettings;
 
     try {
       if (darkmode !== undefined && darkmode !== null) {
@@ -446,6 +454,14 @@ const GraphQLResolver = {
 
       if (description) {
         req.user.settings.description = description;
+      }
+
+      if (avatarURI) {
+        req.user.settings.avatarURI = avatarURI;
+      }
+
+      if (theme) {
+        req.user.settings.theme = theme;
       }
 
       if (showPublicEmail !== undefined && showPublicEmail !== null) {
