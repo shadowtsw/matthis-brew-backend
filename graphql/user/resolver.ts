@@ -5,6 +5,8 @@ import {
   createToken,
   createRefreshToken,
   useRefreshToken,
+  TOKEN_EXPIRES,
+  REFRESHTOKEN_EXPIRES,
 } from '../../utils/jwt/jwt';
 
 import { hashedPassword, comparePassword } from '../../utils/bCrypt/bCrypt';
@@ -227,6 +229,8 @@ const GraphQLResolver = {
           emailAddress: user.emailAddress,
           isAuth: true,
         }),
+        tokenExpiresIn: TOKEN_EXPIRES,
+        refreshTokenExpiresIn: REFRESHTOKEN_EXPIRES,
       };
       user.meta.refreshToken = authObject.refreshToken;
       await user.save();

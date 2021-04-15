@@ -135,6 +135,8 @@ const GraphQLSchema = buildSchema(`
     type TokenObject {
         token:String!
         refreshToken:String!
+        tokenExpiresIn:Int!
+        refreshTokenExpiresIn:Int!
     }
 
     type RootQuery {
