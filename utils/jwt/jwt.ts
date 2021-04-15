@@ -5,7 +5,8 @@ const secretKey =
   '7453hjfoi8hjnf9837u45uhkjbgfe8i734ghbihukghbfekjbtdi8f778t32jnk,xl,dc';
 const refreshKey =
   'kldsfgh käaebrtöoihjearlkfgasädpövkbisodfj0097u0ßaw3t563523213541er gbdweag';
-export const TOKEN_EXPIRES: number = Number(process.env.TOKEN_EXPRES_MIN) || 15;
+export const TOKEN_EXPIRES_MIN: number =
+  Number(process.env.TOKEN_EXPRES_MIN) || 15;
 export const REFRESHTOKEN_EXPIRES: number = 86400;
 const verifyKey = 'koödsgjilkdsfh6+3663363,d 0445444dddddddddd';
 
@@ -33,7 +34,7 @@ const createToken = (data: {
   emailAddress: string;
   isAuth: boolean;
 }) => {
-  return jwt.sign(data, secretKey, { expiresIn: TOKEN_EXPIRES * 60 });
+  return jwt.sign(data, secretKey, { expiresIn: TOKEN_EXPIRES_MIN * 60 });
 };
 
 const createRefreshToken = (data: {

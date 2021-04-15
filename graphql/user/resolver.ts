@@ -5,7 +5,7 @@ import {
   createToken,
   createRefreshToken,
   useRefreshToken,
-  TOKEN_EXPIRES,
+  TOKEN_EXPIRES_MIN,
   REFRESHTOKEN_EXPIRES,
 } from '../../utils/jwt/jwt';
 
@@ -229,7 +229,7 @@ const GraphQLResolver = {
           emailAddress: user.emailAddress,
           isAuth: true,
         }),
-        tokenExpiresIn: TOKEN_EXPIRES,
+        tokenExpiresIn: TOKEN_EXPIRES_MIN * 60,
         refreshTokenExpiresIn: REFRESHTOKEN_EXPIRES,
       };
       user.meta.refreshToken = authObject.refreshToken;
