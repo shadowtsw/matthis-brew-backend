@@ -46,6 +46,13 @@ const GraphQLResolver = {
       if (!favouriteRecipe) {
         throw new Error(errName.RECIPE_NOT_FOUND);
       }
+      const checkDuplicate = req.user.following.some((entry: any) => {
+        return entry._id.toString() === favouriteRecipe._id.toString();
+      });
+
+      if (checkDuplicate) {
+        throw new Error(errName.RECIPE_ALREADY_IN_LIST);
+      }
       if (req.user.favouriteRecipes.length === 10) {
         throw new Error(errName.TOO_MANY_ENTRIES);
       }

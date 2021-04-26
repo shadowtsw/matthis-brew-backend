@@ -23,6 +23,8 @@ export const errName = {
   TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
   OWNER_FAIL: 'OWNER_FAIL',
   COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
+  USER_ALREADY_IN_LIST: 'USER_ALREADY_IN_LIST',
+  RECIPE_ALREADY_IN_LIST: 'RECIPE_ALREADY_IN_LIST',
 };
 
 const errorType: ErrorTypes = {
@@ -85,6 +87,14 @@ const errorType: ErrorTypes = {
   },
   COMMENT_NOT_FOUND: {
     message: 'The related comment doesn`t exist',
+    statusCode: 404,
+  },
+  USER_ALREADY_IN_LIST: {
+    message: 'User already exists in your list',
+    statusCode: 404,
+  },
+  RECIPE_ALREADY_IN_LIST: {
+    message: 'Recipe already exists in your list',
     statusCode: 404,
   },
 };

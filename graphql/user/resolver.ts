@@ -288,20 +288,31 @@ const GraphQLResolver = {
     if (!req.user) {
       throw new Error(errName.AUTH_FAILED);
     }
+    try {
+      const targetUser = await User.findById(followUserID).exec();
 
-    const targetUser = await User.findById(followUserID).exec();
+      if (!targetUser) {
+        throw new Error(errName.USER_NOT_FOUND);
+      }
 
-    if (!targetUser) {
-      throw new Error(errName.USER_NOT_FOUND);
+      const checkDuplicate = req.user.following.some((entry: any) => {
+        return entry._id.toString() === targetUser._id.toString();
+      });
+
+      if (checkDuplicate) {
+        throw new Error(errName.USER_ALREADY_IN_LIST);
+      }
+
+      req.user.following.push(targetUser);
+      targetUser.followers.push(req.user);
+
+      await req.user.save();
+      await targetUser.save();
+
+      return `Success, you are now following ${targetUser.username} !`;
+    } catch (err) {
+      throw err;
     }
-
-    req.user.following.push(targetUser);
-    targetUser.followers.push(req.user);
-
-    await req.user.save();
-    await targetUser.save();
-
-    return `Success, you are now following ${targetUser.username} !`;
   },
   unFollow: async function ({ userID }: any, req: any) {
     if (!req.user) {
@@ -545,6 +556,15 @@ const GraphQLResolver = {
       if (!findBuddy) {
         throw new Error(errName.USER_NOT_FOUND);
       }
+
+      const checkDuplicate = req.user.following.some((entry: any) => {
+        return entry._id.toString() === findBuddy._id.toString();
+      });
+
+      if (checkDuplicate) {
+        throw new Error(errName.USER_ALREADY_IN_LIST);
+      }
+
       req.user.favouriteUsers.push(findBuddy);
       findBuddy.buddyRequest.push(req.user);
       await findBuddy.save();
